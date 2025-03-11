@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Frankel functions and definitions
  *
@@ -12,20 +13,21 @@
  * Register block styles.
  */
 
-if ( ! function_exists( 'frankel_block_styles' ) ) :
+if (! function_exists('frankel_block_styles')) :
 	/**
 	 * Register custom block styles
 	 *
 	 * @since Frankel 1.0
 	 * @return void
 	 */
-	function frankel_block_styles() {
+	function frankel_block_styles()
+	{
 
 		register_block_style(
 			'core/details',
 			array(
 				'name'         => 'arrow-icon-details',
-				'label'        => __( 'Arrow icon', 'frankel' ),
+				'label'        => __('Arrow icon', 'frankel'),
 				/*
 				 * Styles for the custom Arrow icon style of the Details block
 				 */
@@ -48,7 +50,7 @@ if ( ! function_exists( 'frankel_block_styles' ) ) :
 			'core/post-terms',
 			array(
 				'name'         => 'pill',
-				'label'        => __( 'Pill', 'frankel' ),
+				'label'        => __('Pill', 'frankel'),
 				/*
 				 * Styles variation for post terms
 				 * https://github.com/WordPress/gutenberg/issues/24956
@@ -71,7 +73,7 @@ if ( ! function_exists( 'frankel_block_styles' ) ) :
 			'core/list',
 			array(
 				'name'         => 'checkmark-list',
-				'label'        => __( 'Checkmark', 'frankel' ),
+				'label'        => __('Checkmark', 'frankel'),
 				/*
 				 * Styles for the custom checkmark list block style
 				 * https://github.com/WordPress/gutenberg/issues/51480
@@ -90,7 +92,7 @@ if ( ! function_exists( 'frankel_block_styles' ) ) :
 			'core/navigation-link',
 			array(
 				'name'         => 'arrow-link',
-				'label'        => __( 'With arrow', 'frankel' ),
+				'label'        => __('With arrow', 'frankel'),
 				/*
 				 * Styles for the custom arrow nav link block style
 				 */
@@ -108,7 +110,7 @@ if ( ! function_exists( 'frankel_block_styles' ) ) :
 			'core/heading',
 			array(
 				'name'         => 'asterisk',
-				'label'        => __( 'With asterisk', 'frankel' ),
+				'label'        => __('With asterisk', 'frankel'),
 				'inline_style' => "
 				.is-style-asterisk:before {
 					content: '';
@@ -144,20 +146,21 @@ if ( ! function_exists( 'frankel_block_styles' ) ) :
 	}
 endif;
 
-add_action( 'init', 'frankel_block_styles' );
+add_action('init', 'frankel_block_styles');
 
 /**
  * Enqueue block stylesheets.
  */
 
-if ( ! function_exists( 'frankel_block_stylesheets' ) ) :
+if (! function_exists('frankel_block_stylesheets')) :
 	/**
 	 * Enqueue custom block stylesheets
 	 *
 	 * @since Frankel 1.0
 	 * @return void
 	 */
-	function frankel_block_stylesheets() {
+	function frankel_block_stylesheets()
+	{
 		/**
 		 * The wp_enqueue_block_style() function allows us to enqueue a stylesheet
 		 * for a specific block. These will only get loaded when the block is rendered
@@ -170,50 +173,53 @@ if ( ! function_exists( 'frankel_block_stylesheets' ) ) :
 			'core/button',
 			array(
 				'handle' => 'frankel-button-style-outline',
-				'src'    => get_parent_theme_file_uri( 'assets/css/button-outline.css' ),
-				'ver'    => wp_get_theme( get_template() )->get( 'Version' ),
-				'path'   => get_parent_theme_file_path( 'assets/css/button-outline.css' ),
+				'src'    => get_parent_theme_file_uri('assets/css/button-outline.css'),
+				'ver'    => wp_get_theme(get_template())->get('Version'),
+				'path'   => get_parent_theme_file_path('assets/css/button-outline.css'),
 			)
 		);
 	}
 endif;
 
-add_action( 'init', 'frankel_block_stylesheets' );
+add_action('init', 'frankel_block_stylesheets');
 
 /**
  * Register pattern categories.
  */
 
-if ( ! function_exists( 'frankel_pattern_categories' ) ) :
+if (! function_exists('frankel_pattern_categories')) :
 	/**
 	 * Register pattern categories
 	 *
 	 * @since Frankel 1.0
 	 * @return void
 	 */
-	function frankel_pattern_categories() {
+	function frankel_pattern_categories()
+	{
 
 		register_block_pattern_category(
 			'frankel_page',
 			array(
-				'label'       => _x( 'Pages', 'Block pattern category', 'frankel' ),
-				'description' => __( 'A collection of full page layouts.', 'frankel' ),
+				'label'       => _x('Pages', 'Block pattern category', 'frankel'),
+				'description' => __('A collection of full page layouts.', 'frankel'),
 			)
 		);
 	}
 endif;
 
-add_action( 'init', 'frankel_pattern_categories' );
+add_action('init', 'frankel_pattern_categories');
 
-function mytheme_remove_color_palette() {
-    // Remove the default Gutenberg color palette
-    remove_theme_support('editor-color-palette');
+function mytheme_remove_color_palette()
+{
+	// Remove the default Gutenberg color palette
+	remove_theme_support('editor-color-palette');
 }
 add_action('after_setup_theme', 'mytheme_remove_color_palette');
 
 // Load scripts 
 add_action('init', 'header_scripts'); // Add Custom Scripts to wp_head
-function header_scripts() {
+function header_scripts()
+{
 	if ($GLOBALS['pagenow'] != 'wp-login.php' && !is_admin()) {
 		wp_register_script('scripts', get_template_directory_uri() . '/assets/js/scripts.js', array(), '1.0.0'); // Custom scripts
 		wp_enqueue_script('scripts'); // Enqueue it!
@@ -222,43 +228,74 @@ function header_scripts() {
 
 // Load styles
 add_action('wp_enqueue_scripts', 'header_styles'); // Add Child Theme Stylesheet
-function header_styles() {
-    wp_register_style('custom', get_stylesheet_directory_uri() . '/assets/css/custom.css', array(), '1.0', 'all');
-    wp_enqueue_style('custom'); // Enqueue it!
+function header_styles()
+{
+	wp_register_style('custom', get_stylesheet_directory_uri() . '/assets/css/custom.css', array(), '1.0', 'all');
+	wp_enqueue_style('custom'); // Enqueue it!
 
 }
 
 
 // Allow SVG
-add_filter( 'wp_check_filetype_and_ext', function($data, $file, $filename, $mimes) {
+add_filter('wp_check_filetype_and_ext', function ($data, $file, $filename, $mimes) {
 
-  global $wp_version;
-  if ( $wp_version !== '4.7.1' ) {
-     return $data;
-  }
+	global $wp_version;
+	if ($wp_version !== '4.7.1') {
+		return $data;
+	}
 
-  $filetype = wp_check_filetype( $filename, $mimes );
+	$filetype = wp_check_filetype($filename, $mimes);
 
-  return [
-      'ext'             => $filetype['ext'],
-      'type'            => $filetype['type'],
-      'proper_filename' => $data['proper_filename']
-  ];
+	return [
+		'ext'             => $filetype['ext'],
+		'type'            => $filetype['type'],
+		'proper_filename' => $data['proper_filename']
+	];
+}, 10, 4);
 
-}, 10, 4 );
-
-function cc_mime_types( $mimes ){
-  $mimes['svg'] = 'image/svg+xml';
-  return $mimes;
+function cc_mime_types($mimes)
+{
+	$mimes['svg'] = 'image/svg+xml';
+	return $mimes;
 }
-add_filter( 'upload_mimes', 'cc_mime_types' );
+add_filter('upload_mimes', 'cc_mime_types');
 
-function fix_svg() {
-  echo '<style type="text/css">
+function fix_svg()
+{
+	echo '<style type="text/css">
         .attachment-266x266, .thumbnail img {
              width: 100% !important;
              height: auto !important;
         }
         </style>';
 }
-add_action( 'admin_head', 'fix_svg' );
+add_action('admin_head', 'fix_svg');
+
+// Remove default block patterns
+add_action('init', function () {
+	remove_theme_support('core-block-patterns');
+});
+
+add_filter( 'should_load_remote_block_patterns', '__return_false' );
+
+// Disable Openverse image library
+add_filter(
+	'block_editor_settings_all',
+	function ($settings) {
+		$settings['enableOpenverseMediaCategory'] = false;
+
+		return $settings;
+	},
+	10
+);
+
+// Add a category for patterns
+if ( function_exists( 'register_block_pattern_category' ) ) {
+    register_block_pattern_category(
+      'content',
+      array(
+            'label' => __( 'Content', 'frankel' ),
+            'description' => __( 'Content', 'frankel' ),
+       )
+   );
+}

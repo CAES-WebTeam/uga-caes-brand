@@ -28,33 +28,33 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 
-document.addEventListener("DOMContentLoaded", function () {
-  const sideNav = document.querySelector('.side-nav');
-  const footer = document.querySelector('.uga_footer ');
+// document.addEventListener("DOMContentLoaded", function () {
+//   const sideNav = document.querySelector('.side-nav');
+//   const footer = document.querySelector('.uga_footer ');
   
-  // Calculate offset for the side navigation
-  const footerOffset = footer.offsetTop;
+//   // Calculate offset for the side navigation
+//   const footerOffset = footer.offsetTop;
 
-  window.addEventListener('scroll', function () {
-	const scrollPosition = window.scrollY;
-	const sideNavHeight = sideNav.offsetHeight;
-	const windowHeight = window.innerHeight;
+//   window.addEventListener('scroll', function () {
+// 	const scrollPosition = window.scrollY;
+// 	const sideNavHeight = sideNav.offsetHeight;
+// 	const windowHeight = window.innerHeight;
 
-	// When the user scrolls past the footer, make the side-nav "absolute"
-	  console.log("SideNavHEight", sideNavHeight);
-			console.log("scrollPosition", scrollPosition);
-	  console.log("footerOffset - sidenav: ", footerOffset - sideNavHeight);
+// 	// When the user scrolls past the footer, make the side-nav "absolute"
+// 	  console.log("SideNavHEight", sideNavHeight);
+// 			console.log("scrollPosition", scrollPosition);
+// 	  console.log("footerOffset - sidenav: ", footerOffset - sideNavHeight);
 
-	if (scrollPosition + sideNavHeight >= footerOffset) {
-	  sideNav.style.position = 'absolute';
-	  sideNav.style.top = footerOffset - sideNavHeight + 35 + 'px';
-	} else {
-	  // Reset to fixed when above the footer
-	  sideNav.style.position = 'fixed';
-	  sideNav.style.top = '100px';
-	}
-  });
-});
+// 	if (scrollPosition + sideNavHeight >= footerOffset) {
+// 	  sideNav.style.position = 'absolute';
+// 	  sideNav.style.top = footerOffset - sideNavHeight + 35 + 'px';
+// 	} else {
+// 	  // Reset to fixed when above the footer
+// 	  sideNav.style.position = 'fixed';
+// 	  sideNav.style.top = '100px';
+// 	}
+//   });
+// });
 
 
 document.addEventListener("DOMContentLoaded", () => {
