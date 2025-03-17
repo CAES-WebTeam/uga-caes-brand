@@ -326,7 +326,7 @@ figure a {
 	padding-left: 30px;
 }
 
-.uga_mobile_navigation .wp-block-navigation__submenu-container .wp-block-navigation-item:before {
+.uga_mobile_navigation .wp-block-navigation__submenu-container .wp-block-navigation-item .wp-block-navigation-item__label:before {
 	content: '';
 	position: absolute;
 	top: 0;
@@ -370,16 +370,25 @@ figure a {
 }
 
 .main-nav .wp-block-navigation .wp-block-navigation-item.current-menu-item>a,
-.main-nav .wp-block-navigation .wp-block-navigation-item__content:hover {
+.main-nav .wp-block-navigation .wp-block-navigation-item__content:hover,
+.main-nav .wp-block-navigation > .wp-block-navigation-item > .wp-block-navigation-item__content.current-menu-ancestor {
 	background: #ba0c2f;
 	color: #fff !important;
+}
+
+.main-nav .wp-block-navigation .wp-block-navigation__submenu-container .wp-block-navigation-item.current-menu-item>a {
+    background: rgba(0, 0, 0, 0.1) !important;
+    color: inherit !important;
 }
 
 .main-nav .wp-block-navigation .has-child .wp-block-navigation__submenu-container {
 	display: none !important;
 }
 
-.main-nav .wp-block-navigation .has-child.child-active .wp-block-navigation__submenu-container {
+.main-nav .wp-block-navigation .has-child.child-active>.wp-block-navigation__submenu-container,
+.main-nav .wp-block-navigation .current-menu-ancestor+.wp-block-navigation__submenu-container,
+.main-nav .wp-block-navigation .wp-block-navigation__submenu-container .wp-block-navigation-item.current-menu-item>.wp-block-navigation__submenu-container,
+.main-nav .wp-block-navigation .wp-block-navigation__submenu-container .wp-block-navigation-item.child-active>.wp-block-navigation__submenu-container {
 	display: flex !important;
 	width: 100% !important;
 	height: auto !important;
@@ -402,6 +411,15 @@ figure a {
 	left: 0;
 }
 
+.wp-block-navigation .has-child .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container {
+	left: 0;
+	background: rgba(0,0,0,0.1);
+	position: relative !important;
+}
+
+.wp-block-navigation .has-child .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container .wp-block-navigation-item a{
+	padding-left: 3.5rem;
+}
 
 
 /************ Search Bar **************/
