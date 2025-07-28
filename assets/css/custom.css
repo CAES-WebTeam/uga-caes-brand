@@ -81,9 +81,9 @@ figure a {
 	min-width: 200px;
 }
 
-.wp-block-button a:hover {
+/* .wp-block-button a:hover {
 	background-color: #000 !important;
-}
+} */
 
 .main-caes-content {
 	padding: var(--wp--preset--spacing--60) var(--wp--preset--spacing--80);
