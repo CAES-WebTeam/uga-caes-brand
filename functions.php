@@ -308,35 +308,103 @@ function login_stylesheet()
 add_action('login_enqueue_scripts', 'login_stylesheet');
 
 /**
- * Simple shortcode for highlighted search excerpts
- * Use [search_excerpt] in your search results template
+ * Complete search results shortcode
+ * Use [search_results] to display all search results with highlighting
  */
 
-function search_excerpt_shortcode($atts = array()) {
-    // Only work on search pages
-    if (!is_search() || empty(get_search_query())) {
-        return get_the_excerpt();
-    }
-    
-    $atts = shortcode_atts(array(
-        'length' => 40,  // words in excerpt
-        'context' => 20  // words around match
-    ), $atts);
-    
-    global $post;
-    if (!$post) {
+function complete_search_results_shortcode($atts = array()) {
+    if (!is_search()) {
         return '';
     }
     
+    $atts = shortcode_atts(array(
+        'posts_per_page' => get_option('posts_per_page', 10),
+        'excerpt_length' => 40
+    ), $atts);
+    
+    global $wp_query;
     $query = get_search_query();
+    
+    if (empty($query)) {
+        return '<p>Please enter a search term.</p>';
+    }
+    
+    $output = '';
+    
+    // Search results header
+    $output .= '<div class="search-results-header">';
+    $output .= '<h1>Search Results for "' . esc_html($query) . '"</h1>';
+    $output .= '<p>Found ' . $wp_query->found_posts . ' results</p>';
+    $output .= '</div>';
+    
+    if (have_posts()) {
+        $output .= '<div class="search-results-list">';
+        
+        while (have_posts()) {
+            the_post();
+            global $post;
+            
+            // Get clean content for searching
+            $content = strip_tags(strip_shortcodes($post->post_content));
+            $content = preg_replace('/\s+/', ' ', trim($content));
+            
+            // Create smart excerpt
+            $excerpt = create_smart_excerpt($content, $query, intval($atts['excerpt_length']));
+            
+            $output .= '<article class="search-result-item" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">';
+            
+            // Title
+            $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . get_permalink() . '" style="text-decoration: none; color: #2563eb;">' . get_the_title() . '</a></h2>';
+            
+            // Excerpt with highlighting
+            $output .= '<div class="search-excerpt" style="margin-bottom: 0.5rem; color: #666; line-height: 1.6;">' . $excerpt . '</div>';
+            
+            // Meta info
+            $output .= '<div class="search-meta" style="font-size: 0.875rem; color: #888;">';
+            $output .= '<span>' . get_the_date() . '</span>';
+            if (get_post_type() !== 'post') {
+                $post_type_obj = get_post_type_object(get_post_type());
+                if ($post_type_obj) {
+                    $output .= ' • <span>' . $post_type_obj->labels->singular_name . '</span>';
+                }
+            }
+            $output .= ' • <a href="' . get_permalink() . '" style="color: #2563eb;">Read more</a>';
+            $output .= '</div>';
+            
+            $output .= '</article>';
+        }
+        
+        $output .= '</div>';
+        
+        // Pagination
+        $output .= '<div class="search-pagination">';
+        $output .= paginate_links(array(
+            'total' => $wp_query->max_num_pages,
+            'current' => max(1, get_query_var('paged')),
+            'prev_text' => '← Previous',
+            'next_text' => 'Next →'
+        ));
+        $output .= '</div>';
+        
+    } else {
+        $output .= '<div class="no-results">';
+        $output .= '<h2>No results found</h2>';
+        $output .= '<p>Sorry, no posts matched your search criteria. Please try again with different keywords.</p>';
+        $output .= '</div>';
+    }
+    
+    return $output;
+}
+add_shortcode('search_results', 'complete_search_results_shortcode');
+
+/**
+ * Create smart excerpt with highlighting around search terms
+ */
+function create_smart_excerpt($content, $query, $excerpt_length = 40) {
     $search_terms = explode(' ', $query);
     $search_terms = array_filter($search_terms);
     
-    // Get clean content
-    $content = strip_tags(strip_shortcodes($post->post_content));
-    $content = preg_replace('/\s+/', ' ', trim($content));
-    
-    // Find the best match position
+    // Find the first occurrence of any search term
     $best_position = false;
     $matched_term = '';
     
@@ -366,13 +434,14 @@ function search_excerpt_shortcode($atts = array()) {
             }
         }
         
-        // Get context around the match
-        $start = max(0, $word_position - intval($atts['context']));
-        $end = min($total_words, $word_position + intval($atts['context']));
+        // Get context around the match (20 words before and after)
+        $context_words = 20;
+        $start = max(0, $word_position - $context_words);
+        $end = min($total_words, $word_position + $context_words);
         
         // Limit total length
-        if (($end - $start) > intval($atts['length'])) {
-            $end = $start + intval($atts['length']);
+        if (($end - $start) > $excerpt_length) {
+            $end = $start + $excerpt_length;
         }
         
         $excerpt_words = array_slice($words, $start, $end - $start);
@@ -387,7 +456,7 @@ function search_excerpt_shortcode($atts = array()) {
         }
     } else {
         // No match found, use beginning
-        $excerpt = wp_trim_words($content, intval($atts['length']));
+        $excerpt = wp_trim_words($content, $excerpt_length);
     }
     
     // Apply highlighting
@@ -396,39 +465,9 @@ function search_excerpt_shortcode($atts = array()) {
     } else {
         // Manual highlighting fallback
         foreach ($search_terms as $term) {
-            $excerpt = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<strong>$1</strong>', $excerpt);
+            $excerpt = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $excerpt);
         }
     }
     
     return $excerpt;
 }
-add_shortcode('search_excerpt', 'search_excerpt_shortcode');
-
-/**
- * Debug shortcode to test
- * Use [search_debug] to see what's happening
- */
-function search_debug_shortcode() {
-    if (!is_search() || !current_user_can('administrator')) {
-        return '';
-    }
-    
-    global $post;
-    $query = get_search_query();
-    $content = strip_tags(strip_shortcodes($post->post_content));
-    
-    $output = '<div style="background: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin: 10px 0; font-size: 12px;">';
-    $output .= '<strong>Debug for Post ID ' . $post->ID . ':</strong><br>';
-    $output .= 'Query: ' . esc_html($query) . '<br>';
-    $output .= 'Content length: ' . strlen($content) . ' chars<br>';
-    
-    $search_terms = explode(' ', $query);
-    foreach ($search_terms as $term) {
-        $pos = stripos($content, $term);
-        $output .= '"' . esc_html($term) . '" found at: ' . ($pos !== false ? $pos : 'NOT FOUND') . '<br>';
-    }
-    
-    $output .= '</div>';
-    return $output;
-}
-add_shortcode('search_debug', 'search_debug_shortcode');
