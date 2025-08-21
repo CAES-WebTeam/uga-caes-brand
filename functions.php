@@ -307,43 +307,85 @@ function login_stylesheet()
 }
 add_action('login_enqueue_scripts', 'login_stylesheet');
 
-function debug_search_excerpt() {
-    if (is_search() && current_user_can('administrator') && !empty(get_search_query())) {
-        global $wp_query;
-        echo '<div style="background: #f0f0f0; border: 1px solid #ccc; padding: 15px; margin: 20px 0; font-family: monospace; font-size: 12px;">';
-        echo '<h4 style="margin-top:0;">Search Debug Info:</h4>';
-        echo '<strong>Query:</strong> ' . esc_html(get_search_query()) . '<br>';
-        echo '<strong>Results found:</strong> ' . $wp_query->found_posts . '<br>';
-        echo '<strong>Relevanssi active:</strong> ' . (function_exists('relevanssi_highlight_terms') ? 'Yes' : 'No') . '<br>';
+/**
+ * Force Relevanssi excerpts to be used in block themes
+ */
+function force_relevanssi_excerpts($excerpt, $post = null) {
+    // Only on search pages
+    if (!is_search() || empty(get_search_query())) {
+        return $excerpt;
+    }
+    
+    // Get the post object
+    if (!$post) {
+        global $post;
+    }
+    if (!$post) {
+        return $excerpt;
+    }
+    
+    // Check if this post has a Relevanssi excerpt
+    if (isset($post->post_excerpt) && !empty($post->post_excerpt)) {
+        // If Relevanssi has set an excerpt, use it
+        return $post->post_excerpt;
+    }
+    
+    // Fallback: manually create highlighted excerpt
+    if (function_exists('relevanssi_highlight_terms')) {
+        $content = strip_tags(strip_shortcodes($post->post_content));
+        $content = preg_replace('/\s+/', ' ', trim($content));
         
-        if (have_posts()) {
-            echo '<strong>First result debug:</strong><br>';
-            $first_post = $wp_query->posts[0];
-            $content = strip_tags(strip_shortcodes($first_post->post_content));
-            $content = preg_replace('/\s+/', ' ', trim($content));
-            
-            echo '- Post ID: ' . $first_post->ID . '<br>';
-            echo '- Title: ' . esc_html($first_post->post_title) . '<br>';
-            echo '- Content length: ' . strlen($content) . ' chars<br>';
-            
-            // Check if terms exist in content
-            $search_terms = explode(' ', get_search_query());
-            foreach ($search_terms as $term) {
-                $pos = stripos($content, $term);
-                echo '- "' . esc_html($term) . '" found at position: ' . ($pos !== false ? $pos : 'NOT FOUND') . '<br>';
+        // Create excerpt around first search term
+        $query = get_search_query();
+        $search_terms = explode(' ', $query);
+        
+        foreach ($search_terms as $term) {
+            $pos = stripos($content, $term);
+            if ($pos !== false) {
+                // Get 30 words around the match
+                $start = max(0, $pos - 150); // ~150 chars before
+                $excerpt_text = substr($content, $start, 300); // ~300 chars total
+                $excerpt_text = wp_trim_words($excerpt_text, 30);
+                
+                // Add ellipsis if we cut from middle
+                if ($start > 0) {
+                    $excerpt_text = '...' . $excerpt_text;
+                }
+                
+                // Highlight the terms
+                return relevanssi_highlight_terms($excerpt_text, $query, false);
             }
-            
-            // Test highlighting function
-            if (function_exists('relevanssi_highlight_terms')) {
-                $test_highlight = relevanssi_highlight_terms('Test: ai guidelines example', get_search_query(), false);
-                echo '- Highlight test: ' . $test_highlight . '<br>';
-            }
-            
-            // Show what the excerpt filter is doing
-            $test_excerpt = get_the_excerpt($first_post);
-            echo '- Current excerpt: ' . esc_html(substr($test_excerpt, 0, 100)) . '...<br>';
         }
-        echo '</div>';
+        
+        // If no terms found, highlight the regular excerpt
+        $regular_excerpt = wp_trim_words($content, 30);
+        return relevanssi_highlight_terms($regular_excerpt, $query, false);
+    }
+    
+    return $excerpt;
+}
+add_filter('get_the_excerpt', 'force_relevanssi_excerpts', 999, 2);
+add_filter('the_excerpt', 'force_relevanssi_excerpts', 999);
+
+/**
+ * Also hook into post content for block themes that show full content
+ */
+function highlight_search_content($content) {
+    if (is_search() && !empty(get_search_query()) && function_exists('relevanssi_highlight_terms')) {
+        return relevanssi_highlight_terms($content, get_search_query(), true);
+    }
+    return $content;
+}
+add_filter('the_content', 'highlight_search_content', 999);
+
+/**
+ * Debug to confirm it's working - remove after testing
+ */
+function debug_excerpt_override() {
+    if (is_search() && current_user_can('administrator') && !empty(get_search_query())) {
+        echo '<div style="background: lightgreen; padding: 10px; margin: 10px 0; font-size: 12px;">
+                <strong>Excerpt Override Active:</strong> Search excerpts should now show highlighted terms!
+              </div>';
     }
 }
-add_action('wp_head', 'debug_search_excerpt');
+add_action('wp_head', 'debug_excerpt_override');
