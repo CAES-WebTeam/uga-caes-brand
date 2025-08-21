@@ -308,84 +308,127 @@ function login_stylesheet()
 add_action('login_enqueue_scripts', 'login_stylesheet');
 
 /**
- * Force Relevanssi excerpts to be used in block themes
+ * Simple shortcode for highlighted search excerpts
+ * Use [search_excerpt] in your search results template
  */
-function force_relevanssi_excerpts($excerpt, $post = null) {
-    // Only on search pages
+
+function search_excerpt_shortcode($atts = array()) {
+    // Only work on search pages
     if (!is_search() || empty(get_search_query())) {
-        return $excerpt;
+        return get_the_excerpt();
     }
     
-    // Get the post object
+    $atts = shortcode_atts(array(
+        'length' => 40,  // words in excerpt
+        'context' => 20  // words around match
+    ), $atts);
+    
+    global $post;
     if (!$post) {
-        global $post;
-    }
-    if (!$post) {
-        return $excerpt;
+        return '';
     }
     
-    // Check if this post has a Relevanssi excerpt
-    if (isset($post->post_excerpt) && !empty($post->post_excerpt)) {
-        // If Relevanssi has set an excerpt, use it
-        return $post->post_excerpt;
+    $query = get_search_query();
+    $search_terms = explode(' ', $query);
+    $search_terms = array_filter($search_terms);
+    
+    // Get clean content
+    $content = strip_tags(strip_shortcodes($post->post_content));
+    $content = preg_replace('/\s+/', ' ', trim($content));
+    
+    // Find the best match position
+    $best_position = false;
+    $matched_term = '';
+    
+    foreach ($search_terms as $term) {
+        $pos = stripos($content, $term);
+        if ($pos !== false) {
+            if ($best_position === false || $pos < $best_position) {
+                $best_position = $pos;
+                $matched_term = $term;
+            }
+        }
     }
     
-    // Fallback: manually create highlighted excerpt
-    if (function_exists('relevanssi_highlight_terms')) {
-        $content = strip_tags(strip_shortcodes($post->post_content));
-        $content = preg_replace('/\s+/', ' ', trim($content));
+    if ($best_position !== false) {
+        // Create excerpt around the match
+        $words = explode(' ', $content);
+        $total_words = count($words);
         
-        // Create excerpt around first search term
-        $query = get_search_query();
-        $search_terms = explode(' ', $query);
-        
-        foreach ($search_terms as $term) {
-            $pos = stripos($content, $term);
-            if ($pos !== false) {
-                // Get 30 words around the match
-                $start = max(0, $pos - 150); // ~150 chars before
-                $excerpt_text = substr($content, $start, 300); // ~300 chars total
-                $excerpt_text = wp_trim_words($excerpt_text, 30);
-                
-                // Add ellipsis if we cut from middle
-                if ($start > 0) {
-                    $excerpt_text = '...' . $excerpt_text;
-                }
-                
-                // Highlight the terms
-                return relevanssi_highlight_terms($excerpt_text, $query, false);
+        // Find word position from character position
+        $char_count = 0;
+        $word_position = 0;
+        foreach ($words as $index => $word) {
+            $char_count += strlen($word) + 1;
+            if ($char_count >= $best_position) {
+                $word_position = $index;
+                break;
             }
         }
         
-        // If no terms found, highlight the regular excerpt
-        $regular_excerpt = wp_trim_words($content, 30);
-        return relevanssi_highlight_terms($regular_excerpt, $query, false);
+        // Get context around the match
+        $start = max(0, $word_position - intval($atts['context']));
+        $end = min($total_words, $word_position + intval($atts['context']));
+        
+        // Limit total length
+        if (($end - $start) > intval($atts['length'])) {
+            $end = $start + intval($atts['length']);
+        }
+        
+        $excerpt_words = array_slice($words, $start, $end - $start);
+        $excerpt = implode(' ', $excerpt_words);
+        
+        // Add ellipsis
+        if ($start > 0) {
+            $excerpt = '...' . $excerpt;
+        }
+        if ($end < $total_words) {
+            $excerpt = $excerpt . '...';
+        }
+    } else {
+        // No match found, use beginning
+        $excerpt = wp_trim_words($content, intval($atts['length']));
+    }
+    
+    // Apply highlighting
+    if (function_exists('relevanssi_highlight_terms')) {
+        $excerpt = relevanssi_highlight_terms($excerpt, $query, false);
+    } else {
+        // Manual highlighting fallback
+        foreach ($search_terms as $term) {
+            $excerpt = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<strong>$1</strong>', $excerpt);
+        }
     }
     
     return $excerpt;
 }
-add_filter('get_the_excerpt', 'force_relevanssi_excerpts', 999, 2);
-add_filter('the_excerpt', 'force_relevanssi_excerpts', 999);
+add_shortcode('search_excerpt', 'search_excerpt_shortcode');
 
 /**
- * Also hook into post content for block themes that show full content
+ * Debug shortcode to test
+ * Use [search_debug] to see what's happening
  */
-function highlight_search_content($content) {
-    if (is_search() && !empty(get_search_query()) && function_exists('relevanssi_highlight_terms')) {
-        return relevanssi_highlight_terms($content, get_search_query(), true);
+function search_debug_shortcode() {
+    if (!is_search() || !current_user_can('administrator')) {
+        return '';
     }
-    return $content;
-}
-add_filter('the_content', 'highlight_search_content', 999);
-
-/**
- * Debug to confirm it's working - remove after testing
- */
-function debug_excerpt_override() {
-    if (is_search() && current_user_can('administrator') && !empty(get_search_query())) {
-        echo '<div style="background: lightgreen; padding: 10px; margin: 10px 0; font-size: 12px;">
-                <strong>Excerpt Override Active:</strong> Search excerpts should now show highlighted terms!
-              </div>';
+    
+    global $post;
+    $query = get_search_query();
+    $content = strip_tags(strip_shortcodes($post->post_content));
+    
+    $output = '<div style="background: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin: 10px 0; font-size: 12px;">';
+    $output .= '<strong>Debug for Post ID ' . $post->ID . ':</strong><br>';
+    $output .= 'Query: ' . esc_html($query) . '<br>';
+    $output .= 'Content length: ' . strlen($content) . ' chars<br>';
+    
+    $search_terms = explode(' ', $query);
+    foreach ($search_terms as $term) {
+        $pos = stripos($content, $term);
+        $output .= '"' . esc_html($term) . '" found at: ' . ($pos !== false ? $pos : 'NOT FOUND') . '<br>';
     }
+    
+    $output .= '</div>';
+    return $output;
 }
-add_action('wp_head', 'debug_excerpt_override');
+add_shortcode('search_debug', 'search_debug_shortcode');
