@@ -85,6 +85,11 @@ figure a {
 	background-color: #000 !important;
 } */
 
+.wp-block-button.is-style-outline a.wp-block-button__link:hover {
+	background-color: var(--wp--preset--color--contrast);
+	color: var(--wp--preset--color--base);
+}
+
 .main-caes-content {
 	padding: var(--wp--preset--spacing--60) var(--wp--preset--spacing--80);
 	;
@@ -371,14 +376,14 @@ figure a {
 
 .main-nav .wp-block-navigation .wp-block-navigation-item.current-menu-item>a,
 .main-nav .wp-block-navigation .wp-block-navigation-item__content:hover,
-.main-nav .wp-block-navigation > .wp-block-navigation-item > .wp-block-navigation-item__content.current-menu-ancestor {
+.main-nav .wp-block-navigation>.wp-block-navigation-item>.wp-block-navigation-item__content.current-menu-ancestor {
 	background: #ba0c2f;
 	color: #fff !important;
 }
 
 .main-nav .wp-block-navigation .wp-block-navigation__submenu-container .wp-block-navigation-item.current-menu-item>a {
-    background: rgba(0, 0, 0, 0.1) !important;
-    color: inherit !important;
+	background: rgba(0, 0, 0, 0.1) !important;
+	color: inherit !important;
 }
 
 .main-nav .wp-block-navigation .has-child .wp-block-navigation__submenu-container {
@@ -413,11 +418,11 @@ figure a {
 
 .wp-block-navigation .has-child .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container {
 	left: 0;
-	background: rgba(0,0,0,0.1);
+	background: rgba(0, 0, 0, 0.1);
 	position: relative !important;
 }
 
-.wp-block-navigation .has-child .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container .wp-block-navigation-item a{
+.wp-block-navigation .has-child .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container .wp-block-navigation-item a {
 	padding-left: 3.5rem;
 }
 

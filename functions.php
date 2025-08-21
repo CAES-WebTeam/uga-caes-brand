@@ -306,3 +306,208 @@ function login_stylesheet()
 	wp_enqueue_style('custom-login', get_stylesheet_directory_uri() . '/assets/css/login.css');
 }
 add_action('login_enqueue_scripts', 'login_stylesheet');
+
+/**
+ * Smart Search Excerpt Generator for Relevanssi
+ * Add this to your theme's functions.php file
+ */
+
+/**
+ * Generate a smart excerpt that shows highlighted search terms
+ * 
+ * @param int $post_id The post ID (optional, defaults to current post)
+ * @param string $query The search query (optional, defaults to current search)
+ * @param int $excerpt_length Length of excerpt in words (default: 30)
+ * @param int $context_words Words to show around the match (default: 15)
+ * @return string The highlighted excerpt
+ */
+function get_smart_search_excerpt($post_id = null, $query = null, $excerpt_length = 30, $context_words = 15) {
+    // Get post ID if not provided
+    if (!$post_id) {
+        $post_id = get_the_ID();
+    }
+    
+    // Get search query if not provided
+    if (!$query) {
+        $query = get_search_query();
+    }
+    
+    // If no search query, return regular excerpt
+    if (empty($query)) {
+        return get_the_excerpt($post_id);
+    }
+    
+    // Get the full post content
+    $post = get_post($post_id);
+    if (!$post) {
+        return '';
+    }
+    
+    // Get content and strip tags for searching
+    $content = $post->post_content;
+    $title = $post->post_title;
+    
+    // Apply content filters to get the actual displayed content
+    $content = apply_filters('the_content', $content);
+    $content = strip_tags($content);
+    
+    // Clean up the content
+    $content = wp_strip_all_tags($content);
+    $content = preg_replace('/\s+/', ' ', $content); // Normalize whitespace
+    $content = trim($content);
+    
+    // Prepare search terms
+    $search_terms = explode(' ', $query);
+    $search_terms = array_filter($search_terms); // Remove empty terms
+    
+    // First, check if terms appear in the title
+    $title_match = false;
+    foreach ($search_terms as $term) {
+        if (stripos($title, $term) !== false) {
+            $title_match = true;
+            break;
+        }
+    }
+    
+    // If title matches, use beginning of content
+    if ($title_match) {
+        $excerpt = wp_trim_words($content, $excerpt_length);
+    } else {
+        // Find the first occurrence of any search term
+        $best_position = false;
+        $matched_term = '';
+        
+        foreach ($search_terms as $term) {
+            $position = stripos($content, $term);
+            if ($position !== false) {
+                if ($best_position === false || $position < $best_position) {
+                    $best_position = $position;
+                    $matched_term = $term;
+                }
+            }
+        }
+        
+        if ($best_position !== false) {
+            // Create excerpt around the found term
+            $excerpt = create_contextual_excerpt($content, $best_position, $context_words, $excerpt_length);
+        } else {
+            // Fallback to regular excerpt if no matches found
+            $excerpt = wp_trim_words($content, $excerpt_length);
+        }
+    }
+    
+    // Apply Relevanssi highlighting
+    if (function_exists('relevanssi_highlight_terms')) {
+        $excerpt = relevanssi_highlight_terms($excerpt, $query, false);
+    }
+    
+    return $excerpt;
+}
+
+/**
+ * Create an excerpt with context around a specific position
+ * 
+ * @param string $content The full content
+ * @param int $position The position of the match
+ * @param int $context_words Words to show around the match
+ * @param int $max_words Maximum words in excerpt
+ * @return string The contextual excerpt
+ */
+function create_contextual_excerpt($content, $position, $context_words = 15, $max_words = 30) {
+    $words = explode(' ', $content);
+    $total_words = count($words);
+    
+    // Find the word position that contains our character position
+    $char_count = 0;
+    $word_position = 0;
+    
+    foreach ($words as $index => $word) {
+        $char_count += strlen($word) + 1; // +1 for space
+        if ($char_count >= $position) {
+            $word_position = $index;
+            break;
+        }
+    }
+    
+    // Calculate start and end positions
+    $start = max(0, $word_position - $context_words);
+    $end = min($total_words, $word_position + $context_words);
+    
+    // Ensure we don't exceed max_words
+    if (($end - $start) > $max_words) {
+        $end = $start + $max_words;
+    }
+    
+    // Extract the words
+    $excerpt_words = array_slice($words, $start, $end - $start);
+    $excerpt = implode(' ', $excerpt_words);
+    
+    // Add ellipsis if we're not at the beginning/end
+    if ($start > 0) {
+        $excerpt = '...' . $excerpt;
+    }
+    if ($end < $total_words) {
+        $excerpt = $excerpt . '...';
+    }
+    
+    return $excerpt;
+}
+
+/**
+ * Template function to display the smart excerpt
+ * Use this in your search results template
+ */
+function the_smart_search_excerpt($excerpt_length = 30, $context_words = 15) {
+    echo get_smart_search_excerpt(null, null, $excerpt_length, $context_words);
+}
+
+/**
+ * Shortcode version for block themes
+ * Usage: [smart_search_excerpt length="30" context="15"]
+ */
+function smart_search_excerpt_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'length' => 30,
+        'context' => 15,
+    ), $atts);
+    
+    return get_smart_search_excerpt(null, null, intval($atts['length']), intval($atts['context']));
+}
+add_shortcode('smart_search_excerpt', 'smart_search_excerpt_shortcode');
+
+/**
+ * Filter to replace the default excerpt with smart excerpt on search pages
+ * This automatically enhances all excerpts on search pages
+ */
+function replace_excerpt_on_search($excerpt, $post) {
+    if (is_search() && !empty(get_search_query())) {
+        return get_smart_search_excerpt($post->ID);
+    }
+    return $excerpt;
+}
+add_filter('get_the_excerpt', 'replace_excerpt_on_search', 10, 2);
+
+/**
+ * Block pattern for search results (optional)
+ * Registers a block pattern you can use in your search template
+ */
+function register_smart_search_result_pattern() {
+    if (function_exists('register_block_pattern')) {
+        register_block_pattern(
+            'mytheme/smart-search-result',
+            array(
+                'title'       => __('Smart Search Result with Highlighting', 'textdomain'),
+                'description' => _x('A search result item with smart highlighting', 'Block pattern description', 'textdomain'),
+                'content'     => '<!-- wp:group {"style":{"spacing":{"padding":"1rem","margin":{"bottom":"1.5rem"}}},"backgroundColor":"white","className":"search-result-item"} -->
+<div class="wp-block-group search-result-item has-white-background-color has-background" style="margin-bottom:1.5rem;padding:1rem">
+<!-- wp:post-title {"level":3,"isLink":true} /-->
+<!-- wp:shortcode -->[smart_search_excerpt length="40" context="20"]<!-- /wp:shortcode -->
+<!-- wp:post-date {"format":"M j, Y"} /-->
+</div>
+<!-- /wp:group -->',
+                'categories'  => array('posts'),
+            )
+        );
+    }
+}
+add_action('init', 'register_smart_search_result_pattern');
