@@ -307,6 +307,7 @@ function login_stylesheet()
 }
 add_action('login_enqueue_scripts', 'login_stylesheet');
 
+
 /**
  * Smart Search Excerpt Generator for Relevanssi
  * Add this to your theme's functions.php file
@@ -332,6 +333,10 @@ function get_smart_search_excerpt($post_id = null, $query = null, $excerpt_lengt
         $query = get_search_query();
     }
     
+    // Debug: Uncomment these lines to debug
+    // error_log('Smart excerpt - Query: ' . $query);
+    // error_log('Smart excerpt - Post ID: ' . $post_id);
+    
     // If no search query, return regular excerpt
     if (empty($query)) {
         return get_the_excerpt($post_id);
@@ -347,8 +352,10 @@ function get_smart_search_excerpt($post_id = null, $query = null, $excerpt_lengt
     $content = $post->post_content;
     $title = $post->post_title;
     
-    // Apply content filters to get the actual displayed content
-    $content = apply_filters('the_content', $content);
+    // For better performance, you can skip heavy content filters and just strip shortcodes
+    // If you need full content filtering, comment out the next line and uncomment the one after
+    $content = strip_shortcodes($content);
+    // $content = apply_filters('the_content', $content);
     $content = strip_tags($content);
     
     // Clean up the content
@@ -356,9 +363,15 @@ function get_smart_search_excerpt($post_id = null, $query = null, $excerpt_lengt
     $content = preg_replace('/\s+/', ' ', $content); // Normalize whitespace
     $content = trim($content);
     
+    // Debug: Uncomment to see content length
+    // error_log('Content length: ' . strlen($content));
+    
     // Prepare search terms
     $search_terms = explode(' ', $query);
     $search_terms = array_filter($search_terms); // Remove empty terms
+    
+    // Debug: Uncomment to see search terms
+    // error_log('Search terms: ' . print_r($search_terms, true));
     
     // First, check if terms appear in the title
     $title_match = false;
@@ -387,6 +400,10 @@ function get_smart_search_excerpt($post_id = null, $query = null, $excerpt_lengt
             }
         }
         
+        // Debug: Uncomment to see if terms are found
+        // error_log('Best position: ' . ($best_position !== false ? $best_position : 'not found'));
+        // error_log('Matched term: ' . $matched_term);
+        
         if ($best_position !== false) {
             // Create excerpt around the found term
             $excerpt = create_contextual_excerpt($content, $best_position, $context_words, $excerpt_length);
@@ -399,6 +416,16 @@ function get_smart_search_excerpt($post_id = null, $query = null, $excerpt_lengt
     // Apply Relevanssi highlighting
     if (function_exists('relevanssi_highlight_terms')) {
         $excerpt = relevanssi_highlight_terms($excerpt, $query, false);
+        // Debug: Uncomment to see if highlighting was applied
+        // error_log('Highlighted excerpt: ' . $excerpt);
+    } else {
+        // Debug: Uncomment to see if Relevanssi function is missing
+        // error_log('Relevanssi highlight function not available');
+        
+        // Fallback manual highlighting if Relevanssi function isn't available
+        foreach ($search_terms as $term) {
+            $excerpt = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark>$1</mark>', $excerpt);
+        }
     }
     
     return $excerpt;
@@ -476,16 +503,90 @@ function smart_search_excerpt_shortcode($atts) {
 add_shortcode('smart_search_excerpt', 'smart_search_excerpt_shortcode');
 
 /**
- * Filter to replace the default excerpt with smart excerpt on search pages
- * This automatically enhances all excerpts on search pages
+ * Debug output for search pages - remove this after troubleshooting
  */
+function debug_search_excerpt() {
+    if (is_search() && current_user_can('administrator') && !empty(get_search_query())) {
+        global $wp_query;
+        echo '<div style="background: #f0f0f0; border: 1px solid #ccc; padding: 15px; margin: 20px 0; font-family: monospace;">';
+        echo '<h4>Search Debug Info:</h4>';
+        echo '<strong>Query:</strong> ' . esc_html(get_search_query()) . '<br>';
+        echo '<strong>Results found:</strong> ' . $wp_query->found_posts . '<br>';
+        echo '<strong>Relevanssi active:</strong> ' . (function_exists('relevanssi_highlight_terms') ? 'Yes' : 'No') . '<br>';
+        
+        if (have_posts()) {
+            echo '<strong>First result debug:</strong><br>';
+            $first_post = $wp_query->posts[0];
+            $content = strip_tags(strip_shortcodes($first_post->post_content));
+            $content = preg_replace('/\s+/', ' ', trim($content));
+            
+            echo '- Post ID: ' . $first_post->ID . '<br>';
+            echo '- Title: ' . esc_html($first_post->post_title) . '<br>';
+            echo '- Content length: ' . strlen($content) . ' chars<br>';
+            
+            // Check if terms exist in content
+            $search_terms = explode(' ', get_search_query());
+            foreach ($search_terms as $term) {
+                $pos = stripos($content, $term);
+                echo '- "' . esc_html($term) . '" found at position: ' . ($pos !== false ? $pos : 'NOT FOUND') . '<br>';
+            }
+            
+            // Test highlighting
+            if (function_exists('relevanssi_highlight_terms')) {
+                $test_highlight = relevanssi_highlight_terms('Test: ai guidelines example', get_search_query(), false);
+                echo '- Highlight test: ' . $test_highlight . '<br>';
+            }
+        }
+        echo '</div>';
+    }
+}
+add_action('wp_head', 'debug_search_excerpt');
 function replace_excerpt_on_search($excerpt, $post) {
     if (is_search() && !empty(get_search_query())) {
+        // Debug: Add this temporarily to see if the filter is running
+        // error_log('Smart excerpt filter running for: ' . get_search_query());
         return get_smart_search_excerpt($post->ID);
     }
     return $excerpt;
 }
 add_filter('get_the_excerpt', 'replace_excerpt_on_search', 10, 2);
+
+/**
+ * Alternative approach: Hook directly into Relevanssi's excerpt creation
+ * This runs when Relevanssi creates excerpts and should always work
+ */
+function enhance_relevanssi_excerpt($excerpt, $post, $query) {
+    if (empty($query)) {
+        return $excerpt;
+    }
+    
+    // Get the smart excerpt
+    $smart_excerpt = get_smart_search_excerpt($post->ID, $query);
+    
+    // If our smart excerpt is different and better, use it
+    if (!empty($smart_excerpt) && $smart_excerpt !== $excerpt) {
+        return $smart_excerpt;
+    }
+    
+    // Otherwise, just ensure the original excerpt is highlighted
+    if (function_exists('relevanssi_highlight_terms')) {
+        return relevanssi_highlight_terms($excerpt, $query, false);
+    }
+    
+    return $excerpt;
+}
+add_filter('relevanssi_excerpt', 'enhance_relevanssi_excerpt', 10, 3);
+
+/**
+ * Also hook into the content to ensure highlighting happens
+ */
+function ensure_search_highlighting($content) {
+    if (is_search() && !empty(get_search_query()) && function_exists('relevanssi_highlight_terms')) {
+        return relevanssi_highlight_terms($content, get_search_query(), true);
+    }
+    return $content;
+}
+add_filter('the_content', 'ensure_search_highlighting', 999);
 
 /**
  * Block pattern for search results (optional)
