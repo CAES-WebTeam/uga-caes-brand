@@ -312,15 +312,13 @@ add_action('login_enqueue_scripts', 'login_stylesheet');
  * Use [search_results] to display all search results with highlighting
  */
 
+/**
+ * Complete search results using Relevanssi's actual excerpts
+ */
 function complete_search_results_shortcode($atts = array()) {
     if (!is_search()) {
         return '';
     }
-    
-    $atts = shortcode_atts(array(
-        'posts_per_page' => get_option('posts_per_page', 10),
-        'excerpt_length' => 40
-    ), $atts);
     
     global $wp_query;
     $query = get_search_query();
@@ -344,19 +342,25 @@ function complete_search_results_shortcode($atts = array()) {
             the_post();
             global $post;
             
-            // Get clean content for searching
-            $content = strip_tags(strip_shortcodes($post->post_content));
-            $content = preg_replace('/\s+/', ' ', trim($content));
+            // Get the excerpt that Relevanssi already created
+            $excerpt = get_the_excerpt();
             
-            // Create smart excerpt
-            $excerpt = create_smart_excerpt($content, $query, intval($atts['excerpt_length']));
+            // If the excerpt doesn't have highlighting, it means we got the wrong one
+            // Try to get Relevanssi's version from the post object
+            if (isset($post->post_excerpt) && !empty($post->post_excerpt)) {
+                $relevanssi_excerpt = $post->post_excerpt;
+                // Use Relevanssi's excerpt if it has highlighting
+                if (strpos($relevanssi_excerpt, '<strong>') !== false || strpos($relevanssi_excerpt, 'excerpt_part') !== false) {
+                    $excerpt = $relevanssi_excerpt;
+                }
+            }
             
             $output .= '<article class="search-result-item" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">';
             
             // Title
             $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . get_permalink() . '" style="text-decoration: none; color: #2563eb;">' . get_the_title() . '</a></h2>';
             
-            // Excerpt with highlighting
+            // Excerpt (should already have highlighting from Relevanssi)
             $output .= '<div class="search-excerpt" style="margin-bottom: 0.5rem; color: #666; line-height: 1.6;">' . $excerpt . '</div>';
             
             // Meta info
@@ -376,159 +380,13 @@ function complete_search_results_shortcode($atts = array()) {
         
         $output .= '</div>';
         
-        // Pagination
-        $output .= '<div class="search-pagination">';
-        $output .= paginate_links(array(
-            'total' => $wp_query->max_num_pages,
-            'current' => max(1, get_query_var('paged')),
-            'prev_text' => '← Previous',
-            'next_text' => 'Next →'
-        ));
-        $output .= '</div>';
-        
     } else {
         $output .= '<div class="no-results">';
         $output .= '<h2>No results found</h2>';
-        $output .= '<p>Sorry, no posts matched your search criteria. Please try again with different keywords.</p>';
+        $output .= '<p>Sorry, no posts matched your search criteria.</p>';
         $output .= '</div>';
     }
     
     return $output;
 }
 add_shortcode('search_results', 'complete_search_results_shortcode');
-
-/**
- * Create smart excerpt with highlighting around search terms
- */
-function create_smart_excerpt($content, $query, $excerpt_length = 40) {
-    $search_terms = explode(' ', $query);
-    $search_terms = array_filter($search_terms);
-    
-    // Find the first occurrence of any search term
-    $best_position = false;
-    $matched_term = '';
-    
-    foreach ($search_terms as $term) {
-        $pos = stripos($content, $term);
-        if ($pos !== false) {
-            if ($best_position === false || $pos < $best_position) {
-                $best_position = $pos;
-                $matched_term = $term;
-            }
-        }
-    }
-    
-    if ($best_position !== false) {
-        // Create excerpt around the match
-        $words = explode(' ', $content);
-        $total_words = count($words);
-        
-        // Find word position from character position
-        $char_count = 0;
-        $word_position = 0;
-        foreach ($words as $index => $word) {
-            $char_count += strlen($word) + 1;
-            if ($char_count >= $best_position) {
-                $word_position = $index;
-                break;
-            }
-        }
-        
-        // Get context around the match (20 words before and after)
-        $context_words = 20;
-        $start = max(0, $word_position - $context_words);
-        $end = min($total_words, $word_position + $context_words);
-        
-        // Limit total length
-        if (($end - $start) > $excerpt_length) {
-            $end = $start + $excerpt_length;
-        }
-        
-        $excerpt_words = array_slice($words, $start, $end - $start);
-        $excerpt = implode(' ', $excerpt_words);
-        
-        // Add ellipsis
-        if ($start > 0) {
-            $excerpt = '...' . $excerpt;
-        }
-        if ($end < $total_words) {
-            $excerpt = $excerpt . '...';
-        }
-    } else {
-        // No match found, use beginning
-        $excerpt = wp_trim_words($content, $excerpt_length);
-    }
-    
-    // Apply highlighting
-    if (function_exists('relevanssi_highlight_terms')) {
-        $excerpt = relevanssi_highlight_terms($excerpt, $query, false);
-    } else {
-        // Manual highlighting fallback
-        foreach ($search_terms as $term) {
-            $excerpt = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $excerpt);
-        }
-    }
-    
-    return $excerpt;
-}
-
-/**
- * Debug what content we're actually getting vs what Relevanssi sees
- */
-function debug_content_comparison() {
-    if (!is_search() || !current_user_can('administrator') || empty(get_search_query())) {
-        return '';
-    }
-    
-    global $post;
-    $query = get_search_query();
-    
-    // Our method
-    $our_content = strip_tags(strip_shortcodes($post->post_content));
-    $our_content = preg_replace('/\s+/', ' ', trim($our_content));
-    
-    // Alternative methods
-    $content_filtered = apply_filters('the_content', $post->post_content);
-    $content_filtered_clean = strip_tags($content_filtered);
-    
-    $output = '<div style="background: #f0f0f0; border: 1px solid #ccc; padding: 15px; margin: 20px 0; font-family: monospace; font-size: 11px;">';
-    $output .= '<h4>Content Debug for Post ID: ' . $post->ID . '</h4>';
-    
-    $output .= '<strong>Our content (first 200 chars):</strong><br>';
-    $output .= esc_html(substr($our_content, 0, 200)) . '...<br><br>';
-    
-    $output .= '<strong>Filtered content (first 200 chars):</strong><br>';
-    $output .= esc_html(substr($content_filtered_clean, 0, 200)) . '...<br><br>';
-    
-    // Check where terms are found in each
-    $search_terms = explode(' ', $query);
-    foreach ($search_terms as $term) {
-        $pos1 = stripos($our_content, $term);
-        $pos2 = stripos($content_filtered_clean, $term);
-        $output .= '<strong>"' . esc_html($term) . '":</strong><br>';
-        $output .= '- Our method: ' . ($pos1 !== false ? $pos1 : 'NOT FOUND') . '<br>';
-        $output .= '- Filtered method: ' . ($pos2 !== false ? $pos2 : 'NOT FOUND') . '<br>';
-        
-        if ($pos1 !== false) {
-            $context = substr($our_content, max(0, $pos1-50), 100);
-            $output .= '- Context (our): ' . esc_html($context) . '<br>';
-        }
-        if ($pos2 !== false) {
-            $context = substr($content_filtered_clean, max(0, $pos2-50), 100);
-            $output .= '- Context (filtered): ' . esc_html($context) . '<br>';
-        }
-        $output .= '<br>';
-    }
-    
-    // Test what Relevanssi is actually working with
-    if (function_exists('relevanssi_highlight_terms')) {
-        $test1 = relevanssi_highlight_terms(substr($our_content, 0, 300), $query, false);
-        $test2 = relevanssi_highlight_terms(substr($content_filtered_clean, 0, 300), $query, false);
-        $output .= '<strong>Relevanssi test on our content:</strong><br>' . $test1 . '<br><br>';
-        $output .= '<strong>Relevanssi test on filtered content:</strong><br>' . $test2 . '<br><br>';
-    }
-    
-    $output .= '</div>';
-    return $output;
-}
-add_shortcode('debug_content', 'debug_content_comparison');
