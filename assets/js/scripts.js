@@ -178,11 +178,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Found the text! Get the element containing it
                     const element = node.parentElement;
                     
-                    // Scroll to the element
-                    element.scrollIntoView({ 
-                        behavior: prefersReducedMotion ? 'auto' : 'smooth', 
-                        block: 'center' 
-                    });
+                    console.log('Element to scroll to:', element);
+                    console.log('Element position:', element.getBoundingClientRect());
+                    console.log('Window height:', window.innerHeight);
+                    
+                    // Try different scroll approaches
+                    try {
+                        // Method 1: scrollIntoView
+                        element.scrollIntoView({ 
+                            behavior: prefersReducedMotion ? 'auto' : 'smooth', 
+                            block: 'center' 
+                        });
+                        console.log('scrollIntoView called');
+                        
+                        // Method 2: Also try scrolling the window directly
+                        setTimeout(() => {
+                            const rect = element.getBoundingClientRect();
+                            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            const targetY = rect.top + scrollTop - (window.innerHeight / 2);
+                            
+                            console.log('Manually scrolling to:', targetY);
+                            window.scrollTo({
+                                top: targetY,
+                                behavior: prefersReducedMotion ? 'auto' : 'smooth'
+                            });
+                        }, 100);
+                        
+                    } catch (error) {
+                        console.log('Scroll error:', error);
+                    }
                     
                     // Add temporary highlight
                     const originalText = node.textContent;
@@ -210,8 +234,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // If exact phrase not found, try individual words
         if (!found) {
+            console.log('Exact phrase not found, trying individual words');
             const words = searchText.split(' ').filter(word => word.length > 2);
             for (let word of words) {
+                console.log('Trying word:', word);
                 if (findAndHighlightText(word)) {
                     break;
                 }
