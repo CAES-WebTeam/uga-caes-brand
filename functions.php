@@ -508,85 +508,29 @@ function create_smart_excerpt_function($content, $query) {
 }
 
 /**
- * DEBUG VERSION - Add ACCESSIBLE JavaScript for deep linking to search results
+ * SIMPLE DEBUG - Add JavaScript for deep linking to search results
  */
 function add_search_highlight_script() {
     ?>
     <script>
+    console.log('Search highlight script loaded');
+    
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded');
+        console.log('Current URL:', window.location.href);
+        
         // Check if we have a highlight parameter
         const urlParams = new URLSearchParams(window.location.search);
+        console.log('All URL params:', urlParams.toString());
+        
         const highlightText = urlParams.get('highlight');
+        console.log('Highlight parameter:', highlightText);
         
         if (highlightText) {
-            console.log('Looking for:', highlightText);
-            
-            // Decode the highlight text
-            const searchText = decodeURIComponent(highlightText).toLowerCase();
-            console.log('Searching for (lowercase):', searchText);
-            
-            // Check user's motion preferences
-            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            
-            // Function to find and highlight text
-            function findAndHighlightText(searchText) {
-                const walker = document.createTreeWalker(
-                    document.body,
-                    NodeFilter.SHOW_TEXT,
-                    null,
-                    false
-                );
-                
-                let node;
-                let found = false;
-                let searchCount = 0;
-                
-                // Search through all text nodes
-                while (node = walker.nextNode()) {
-                    const text = node.textContent.toLowerCase();
-                    const position = text.indexOf(searchText);
-                    
-                    searchCount++;
-                    if (position !== -1) {
-                        console.log('FOUND at position', position, 'in text:', text.substring(Math.max(0, position-20), position+50));
-                    }
-                    
-                    if (position !== -1 && !found) {
-                        console.log('Using this match for scrolling');
-                        // Found the text! Get the element containing it
-                        const element = node.parentElement;
-                        
-                        // Scroll to the element (respecting motion preferences)
-                        element.scrollIntoView({ 
-                            behavior: prefersReducedMotion ? 'auto' : 'smooth', 
-                            block: 'center' 
-                        });
-                        
-                        console.log('Scrolled to element:', element);
-                        
-                        found = true;
-                        break;
-                    }
-                }
-                
-                console.log('Searched through', searchCount, 'text nodes. Found:', found);
-                return found;
-            }
-            
-            // Try to find exact phrase first
-            let found = findAndHighlightText(searchText);
-            
-            // If exact phrase not found, try individual words
-            if (!found) {
-                console.log('Exact phrase not found, trying individual words');
-                const words = searchText.split(' ').filter(word => word.length > 2);
-                for (let word of words) {
-                    console.log('Trying word:', word);
-                    if (findAndHighlightText(word)) {
-                        break;
-                    }
-                }
-            }
+            console.log('We have highlight text, proceeding...');
+            alert('Found highlight parameter: ' + highlightText);
+        } else {
+            console.log('No highlight parameter found');
         }
     });
     </script>
