@@ -365,12 +365,18 @@ function complete_search_results_shortcode($atts = array()) {
 add_shortcode('search_results', 'complete_search_results_shortcode');
 
 /**
- * Create smart excerpt with heading awareness
- */
-/**
- * Create smart excerpt with heading awareness - PRESERVES ORIGINAL CASE
+ * Create smart excerpt with heading awareness - WITH HTML SANITIZATION
  */
 function create_smart_excerpt_function($content, $query) {
+    // Define allowed HTML tags for sanitization
+    $allowed_html = array(
+        'mark' => array(
+            'style' => array()
+        ),
+        'strong' => array(),
+        'br' => array()
+    );
+    
     // Apply content filters to get the real content
     $filtered_content = apply_filters('the_content', $content);
     
@@ -393,10 +399,11 @@ function create_smart_excerpt_function($content, $query) {
                     $context = wp_trim_words($after_heading, 25);
                     
                     // Highlight preserving original case
-                    $highlighted_heading = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $heading_text);
-                    $highlighted_context = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $context);
+                    $highlighted_heading = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $heading_text);
+                    $highlighted_context = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $context);
                     
-                    return '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
+                    $result = '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
+                    return wp_kses($result, $allowed_html);
                 }
             }
         }
@@ -431,11 +438,12 @@ function create_smart_excerpt_function($content, $query) {
                     $highlighted_context = $context;
                     
                     foreach ($search_terms as $term) {
-                        $highlighted_heading = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $highlighted_heading);
-                        $highlighted_context = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $highlighted_context);
+                        $highlighted_heading = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $highlighted_heading);
+                        $highlighted_context = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $highlighted_context);
                     }
                     
-                    return '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
+                    $result = '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
+                    return wp_kses($result, $allowed_html);
                 }
             }
         }
@@ -457,9 +465,9 @@ function create_smart_excerpt_function($content, $query) {
         }
         
         // Highlight the exact phrase preserving original case
-        $excerpt_text = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $excerpt_text);
+        $excerpt_text = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $excerpt_text);
         
-        return $excerpt_text;
+        return wp_kses($excerpt_text, $allowed_html);
     }
     
     // Final fallback - individual terms
@@ -485,11 +493,12 @@ function create_smart_excerpt_function($content, $query) {
         }
         
         foreach ($search_terms as $term) {
-            $excerpt_text = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $excerpt_text);
+            $excerpt_text = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $excerpt_text);
         }
         
-        return $excerpt_text;
+        return wp_kses($excerpt_text, $allowed_html);
     }
     
-    return wp_trim_words($clean_content, 40);
+    // Final fallback - sanitize even plain text
+    return wp_kses(wp_trim_words($clean_content, 40), $allowed_html);
 }
