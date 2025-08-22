@@ -739,6 +739,10 @@ html {
 	font-weight: normal;
 }
 
+mark {
+	color: inherit;
+}
+
 /***********  Mobile *************/
 @media (max-width: 768px) {
 
