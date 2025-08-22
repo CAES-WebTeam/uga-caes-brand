@@ -308,76 +308,7 @@ function login_stylesheet()
 add_action('login_enqueue_scripts', 'login_stylesheet');
 
 /**
- * Complete search results shortcode - SINGLE VERSION
- */
-function complete_search_results_shortcode($atts = array()) {
-    if (!is_search()) {
-        return '';
-    }
-    
-    global $wp_query;
-    $query = get_search_query();
-    
-    if (empty($query)) {
-        return '<p>Please enter a search term.</p>';
-    }
-    
-    $output = '';
-    
-    // Search results header
-    $output .= '<div class="search-results-header">';
-    $output .= '<h1>Search Results for "' . esc_html($query) . '"</h1>';
-    $output .= '<p>Found ' . $wp_query->found_posts . ' results</p>';
-    $output .= '</div>';
-    
-    if (have_posts()) {
-        $output .= '<div class="search-results-list">';
-        
-        while (have_posts()) {
-            the_post();
-            global $post;
-            
-            // Create smart excerpt
-            $excerpt = create_smart_excerpt_function($post->post_content, $query);
-            
-            $output .= '<article class="search-result-item" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">';
-            
-            // Title
-            $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . get_permalink() . '" style="text-decoration: none; color: #2563eb;">' . get_the_title() . '</a></h2>';
-            
-            // Excerpt (don't escape HTML since we want highlighting to show)
-            $output .= '<div class="search-excerpt" style="margin-bottom: 0.5rem; color: #666; line-height: 1.6;">' . $excerpt . '</div>';
-            
-            // Meta info
-            $output .= '<div class="search-meta" style="font-size: 0.875rem; color: #888;">';
-            $output .= '<span>' . get_the_date() . '</span>';
-            if (get_post_type() !== 'post') {
-                $post_type_obj = get_post_type_object(get_post_type());
-                if ($post_type_obj) {
-                    $output .= ' • <span>' . esc_html($post_type_obj->labels->singular_name) . '</span>';
-                }
-            }
-            $output .= ' • <a href="' . get_permalink() . '" style="color: #2563eb;">Read more</a>';
-            $output .= '</div>';
-            
-            $output .= '</article>';
-        }
-        
-        $output .= '</div>';
-        
-    } else {
-        $output .= '<div class="no-results">';
-        $output .= '<h2>No results found</h2>';
-        $output .= '<p>Sorry, no posts matched your search criteria.</p>';
-        $output .= '</div>';
-    }
-    
-    return $output;
-}
-add_shortcode('search_results', 'complete_search_results_shortcode');
-
-/**
- * Create smart excerpt with heading awareness
+ * Create smart excerpt with heading awareness - PRESERVES ORIGINAL CASE
  */
 function create_smart_excerpt_function($content, $query) {
     // Apply content filters to get the real content
@@ -401,9 +332,9 @@ function create_smart_excerpt_function($content, $query) {
                     $after_heading = preg_replace('/\s+/', ' ', trim($after_heading));
                     $context = wp_trim_words($after_heading, 25);
                     
-                    // Highlight the heading and context
-                    $highlighted_heading = str_ireplace($query, '<mark style="background: yellow; padding: 2px;">' . $query . '</mark>', $heading_text);
-                    $highlighted_context = str_ireplace($query, '<mark style="background: yellow; padding: 2px;">' . $query . '</mark>', $context);
+                    // Highlight preserving original case
+                    $highlighted_heading = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $heading_text);
+                    $highlighted_context = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $context);
                     
                     return '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
                 }
@@ -435,13 +366,13 @@ function create_smart_excerpt_function($content, $query) {
                     $after_heading = preg_replace('/\s+/', ' ', trim($after_heading));
                     $context = wp_trim_words($after_heading, 25);
                     
-                    // Apply highlighting to heading and context
+                    // Apply highlighting preserving original case
                     $highlighted_heading = $heading_text;
                     $highlighted_context = $context;
                     
                     foreach ($search_terms as $term) {
-                        $highlighted_heading = str_ireplace($term, '<mark style="background: yellow; padding: 2px;">' . $term . '</mark>', $highlighted_heading);
-                        $highlighted_context = str_ireplace($term, '<mark style="background: yellow; padding: 2px;">' . $term . '</mark>', $highlighted_context);
+                        $highlighted_heading = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $highlighted_heading);
+                        $highlighted_context = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $highlighted_context);
                     }
                     
                     return '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
@@ -465,8 +396,8 @@ function create_smart_excerpt_function($content, $query) {
             $excerpt_text = '...' . $excerpt_text;
         }
         
-        // Highlight the exact phrase
-        $excerpt_text = str_ireplace($query, '<mark style="background: yellow; padding: 2px;">' . $query . '</mark>', $excerpt_text);
+        // Highlight the exact phrase preserving original case
+        $excerpt_text = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $excerpt_text);
         
         return $excerpt_text;
     }
@@ -494,7 +425,7 @@ function create_smart_excerpt_function($content, $query) {
         }
         
         foreach ($search_terms as $term) {
-            $excerpt_text = str_ireplace($term, '<mark style="background: yellow; padding: 2px;">' . $term . '</mark>', $excerpt_text);
+            $excerpt_text = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $excerpt_text);
         }
         
         return $excerpt_text;
