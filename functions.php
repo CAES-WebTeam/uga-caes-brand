@@ -308,12 +308,7 @@ function login_stylesheet()
 add_action('login_enqueue_scripts', 'login_stylesheet');
 
 /**
- * Complete search results shortcode
- * Use [search_results] to display all search results with highlighting
- */
-
-/**
- * Complete search results using Relevanssi's actual excerpts
+ * Complete search results that captures headings
  */
 function complete_search_results_shortcode($atts = array()) {
     if (!is_search()) {
@@ -342,25 +337,15 @@ function complete_search_results_shortcode($atts = array()) {
             the_post();
             global $post;
             
-            // Get the excerpt that Relevanssi already created
-            $excerpt = get_the_excerpt();
-            
-            // If the excerpt doesn't have highlighting, it means we got the wrong one
-            // Try to get Relevanssi's version from the post object
-            if (isset($post->post_excerpt) && !empty($post->post_excerpt)) {
-                $relevanssi_excerpt = $post->post_excerpt;
-                // Use Relevanssi's excerpt if it has highlighting
-                if (strpos($relevanssi_excerpt, '<strong>') !== false || strpos($relevanssi_excerpt, 'excerpt_part') !== false) {
-                    $excerpt = $relevanssi_excerpt;
-                }
-            }
+            // Create smart excerpt that captures headings
+            $excerpt = create_heading_aware_excerpt($post->post_content, $query);
             
             $output .= '<article class="search-result-item" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">';
             
             // Title
             $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . get_permalink() . '" style="text-decoration: none; color: #2563eb;">' . get_the_title() . '</a></h2>';
             
-            // Excerpt (should already have highlighting from Relevanssi)
+            // Excerpt with heading awareness
             $output .= '<div class="search-excerpt" style="margin-bottom: 0.5rem; color: #666; line-height: 1.6;">' . $excerpt . '</div>';
             
             // Meta info
@@ -390,3 +375,92 @@ function complete_search_results_shortcode($atts = array()) {
     return $output;
 }
 add_shortcode('search_results', 'complete_search_results_shortcode');
+
+/**
+ * Create excerpt that prioritizes headings containing search terms
+ */
+function create_heading_aware_excerpt($content, $query) {
+    $search_terms = explode(' ', $query);
+    $search_terms = array_filter($search_terms);
+    
+    // Apply content filters to get the real content
+    $filtered_content = apply_filters('the_content', $content);
+    
+    // Extract headings first
+    preg_match_all('/<h[1-6][^>]*>(.*?)<\/h[1-6]>/i', $filtered_content, $headings);
+    
+    // Check if any heading contains our search terms
+    if (!empty($headings[1])) {
+        foreach ($headings[1] as $heading_text) {
+            $heading_clean = strip_tags($heading_text);
+            foreach ($search_terms as $term) {
+                if (stripos($heading_clean, $term) !== false) {
+                    // Found a heading with our search term!
+                    // Get some context around this heading
+                    $heading_pattern = '/<h[1-6][^>]*>' . preg_quote($heading_text, '/') . '<\/h[1-6]>/i';
+                    $split = preg_split($heading_pattern, $filtered_content, 2);
+                    
+                    if (count($split) == 2) {
+                        // Get some text after the heading
+                        $after_heading = strip_tags($split[1]);
+                        $after_heading = preg_replace('/\s+/', ' ', trim($after_heading));
+                        $context = wp_trim_words($after_heading, 25);
+                        
+                        $excerpt = '<strong>' . $heading_clean . '</strong><br>' . $context;
+                        
+                        // Apply highlighting
+                        if (function_exists('relevanssi_highlight_terms')) {
+                            $excerpt = relevanssi_highlight_terms($excerpt, $query, false);
+                        } else {
+                            foreach ($search_terms as $term) {
+                                $excerpt = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow;">$1</mark>', $excerpt);
+                            }
+                        }
+                        
+                        return $excerpt;
+                    }
+                }
+            }
+        }
+    }
+    
+    // No heading match, fall back to content search
+    $clean_content = strip_tags($filtered_content);
+    $clean_content = preg_replace('/\s+/', ' ', trim($clean_content));
+    
+    // Find first occurrence of search terms
+    $best_position = false;
+    foreach ($search_terms as $term) {
+        $pos = stripos($clean_content, $term);
+        if ($pos !== false) {
+            if ($best_position === false || $pos < $best_position) {
+                $best_position = $pos;
+            }
+        }
+    }
+    
+    if ($best_position !== false) {
+        // Create excerpt around the match
+        $start = max(0, $best_position - 100);
+        $excerpt_text = substr($clean_content, $start, 300);
+        $excerpt_text = wp_trim_words($excerpt_text, 40);
+        
+        if ($start > 0) {
+            $excerpt_text = '...' . $excerpt_text;
+        }
+        
+        // Apply highlighting
+        if (function_exists('relevanssi_highlight_terms')) {
+            $excerpt_text = relevanssi_highlight_terms($excerpt_text, $query, false);
+        } else {
+            foreach ($search_terms as $term) {
+                $excerpt_text = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow;">$1</mark>', $excerpt_text);
+            }
+        }
+        
+        return $excerpt_text;
+    }
+    
+    // Final fallback
+    return wp_trim_words($clean_content, 40);
+}
