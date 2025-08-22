@@ -343,22 +343,10 @@ function complete_search_results_shortcode($atts = array()) {
             $output .= '<article class="search-result-item" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">';
             
             // Title
-            $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . get_permalink() . '" style="text-decoration: none; color: #2563eb;">' . get_the_title() . '</a></h2>';
+            $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . get_permalink() . '" style="text-decoration: none;">' . get_the_title() . '</a></h2>';
             
             // Excerpt (don't escape HTML since we want highlighting to show)
             $output .= '<div class="search-excerpt" style="margin-bottom: 0.5rem; color: #666; line-height: 1.6;">' . $excerpt . '</div>';
-            
-            // Meta info
-            $output .= '<div class="search-meta" style="font-size: 0.875rem; color: #888;">';
-            $output .= '<span>' . get_the_date() . '</span>';
-            if (get_post_type() !== 'post') {
-                $post_type_obj = get_post_type_object(get_post_type());
-                if ($post_type_obj) {
-                    $output .= ' • <span>' . esc_html($post_type_obj->labels->singular_name) . '</span>';
-                }
-            }
-            $output .= ' • <a href="' . get_permalink() . '" style="color: #2563eb;">Read more</a>';
-            $output .= '</div>';
             
             $output .= '</article>';
         }
