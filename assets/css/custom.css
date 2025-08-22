@@ -732,13 +732,6 @@ html {
 	position: relative;
 }
 
-.search-result-item a[href*="highlight"]::after {
-	content: " (jump to content)";
-	font-size: 0.8em;
-	color: #666;
-	font-weight: normal;
-}
-
 mark {
 	color: inherit;
 }
