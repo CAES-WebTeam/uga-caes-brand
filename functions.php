@@ -308,7 +308,7 @@ function login_stylesheet()
 add_action('login_enqueue_scripts', 'login_stylesheet');
 
 /**
- * Complete search results shortcode - SINGLE VERSION
+ * Complete search results shortcode - WITH DEEP LINKING
  */
 function complete_search_results_shortcode($atts = array()) {
     if (!is_search()) {
@@ -337,16 +337,31 @@ function complete_search_results_shortcode($atts = array()) {
             the_post();
             global $post;
             
+            // Create deep link with highlight parameter
+            $deep_link = add_query_arg('highlight', urlencode($query), get_permalink());
+            
             // Create smart excerpt
             $excerpt = create_smart_excerpt_function($post->post_content, $query);
             
             $output .= '<article class="search-result-item" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">';
             
-            // Title
-            $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . get_permalink() . '" style="text-decoration: none;">' . get_the_title() . '</a></h2>';
+            // Title with deep link
+            $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . esc_url($deep_link) . '" style="text-decoration: none; color: #2563eb;">' . get_the_title() . '</a></h2>';
             
             // Excerpt (don't escape HTML since we want highlighting to show)
             $output .= '<div class="search-excerpt" style="margin-bottom: 0.5rem; color: #666; line-height: 1.6;">' . $excerpt . '</div>';
+            
+            // Meta info with deep link
+            $output .= '<div class="search-meta" style="font-size: 0.875rem; color: #888;">';
+            $output .= '<span>' . get_the_date() . '</span>';
+            if (get_post_type() !== 'post') {
+                $post_type_obj = get_post_type_object(get_post_type());
+                if ($post_type_obj) {
+                    $output .= ' • <span>' . esc_html($post_type_obj->labels->singular_name) . '</span>';
+                }
+            }
+            $output .= ' • <a href="' . esc_url($deep_link) . '" style="color: #2563eb;">Read more</a>';
+            $output .= '</div>';
             
             $output .= '</article>';
         }
@@ -502,3 +517,94 @@ function create_smart_excerpt_function($content, $query) {
     // Final fallback - sanitize even plain text
     return wp_kses(wp_trim_words($clean_content, 40), $allowed_html);
 }
+
+/**
+ * Add JavaScript for deep linking to search results
+ */
+function add_search_highlight_script() {
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if we have a highlight parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const highlightText = urlParams.get('highlight');
+        
+        if (highlightText) {
+            // Decode the highlight text
+            const searchText = decodeURIComponent(highlightText).toLowerCase();
+            
+            // Function to find and highlight text
+            function findAndHighlightText(searchText) {
+                const walker = document.createTreeWalker(
+                    document.body,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
+                
+                let node;
+                let found = false;
+                
+                // Search through all text nodes
+                while (node = walker.nextNode()) {
+                    const text = node.textContent.toLowerCase();
+                    const position = text.indexOf(searchText);
+                    
+                    if (position !== -1 && !found) {
+                        // Found the text! Get the element containing it
+                        const element = node.parentElement;
+                        
+                        // Scroll to the element
+                        element.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                        
+                        // Create a highlight span
+                        const originalText = node.textContent;
+                        const beforeText = originalText.substring(0, position);
+                        const matchText = originalText.substring(position, position + highlightText.length);
+                        const afterText = originalText.substring(position + highlightText.length);
+                        
+                        // Replace the text node with highlighted version
+                        const span = document.createElement('span');
+                        span.innerHTML = beforeText + 
+                            '<span id="search-highlight-flash" style="background: #ffff00; padding: 2px 4px; border-radius: 3px; transition: background-color 3s ease;">' + 
+                            matchText + '</span>' + afterText;
+                        
+                        element.replaceChild(span, node);
+                        
+                        // Flash effect - fade out the highlight after 3 seconds
+                        setTimeout(function() {
+                            const flashElement = document.getElementById('search-highlight-flash');
+                            if (flashElement) {
+                                flashElement.style.backgroundColor = 'transparent';
+                            }
+                        }, 3000);
+                        
+                        found = true;
+                        break;
+                    }
+                }
+                
+                return found;
+            }
+            
+            // Try to find exact phrase first
+            let found = findAndHighlightText(searchText);
+            
+            // If exact phrase not found, try individual words
+            if (!found) {
+                const words = searchText.split(' ').filter(word => word.length > 2);
+                for (let word of words) {
+                    if (findAndHighlightText(word)) {
+                        break;
+                    }
+                }
+            }
+        }
+    });
+    </script>
+    <?php
+}
+add_action('wp_footer', 'add_search_highlight_script');
