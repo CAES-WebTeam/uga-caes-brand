@@ -307,8 +307,9 @@ function login_stylesheet()
 }
 add_action('login_enqueue_scripts', 'login_stylesheet');
 
+
 /**
- * Complete search results shortcode - WITH DEEP LINKING
+ * Complete search results shortcode - CLEANED UP
  */
 function complete_search_results_shortcode($atts = array()) {
     if (!is_search()) {
@@ -345,23 +346,11 @@ function complete_search_results_shortcode($atts = array()) {
             
             $output .= '<article class="search-result-item" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">';
             
-            // Title with deep link
-            $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . esc_url($deep_link) . '" style="text-decoration: none; color: #2563eb;">' . get_the_title() . '</a></h2>';
+            // Title with deep link (no blue styling)
+            $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . esc_url($deep_link) . '">' . get_the_title() . '</a></h2>';
             
             // Excerpt (don't escape HTML since we want highlighting to show)
             $output .= '<div class="search-excerpt" style="margin-bottom: 0.5rem; color: #666; line-height: 1.6;">' . $excerpt . '</div>';
-            
-            // Meta info with deep link
-            $output .= '<div class="search-meta" style="font-size: 0.875rem; color: #888;">';
-            $output .= '<span>' . get_the_date() . '</span>';
-            if (get_post_type() !== 'post') {
-                $post_type_obj = get_post_type_object(get_post_type());
-                if ($post_type_obj) {
-                    $output .= ' • <span>' . esc_html($post_type_obj->labels->singular_name) . '</span>';
-                }
-            }
-            $output .= ' • <a href="' . esc_url($deep_link) . '" style="color: #2563eb;">Read more</a>';
-            $output .= '</div>';
             
             $output .= '</article>';
         }
@@ -377,10 +366,9 @@ function complete_search_results_shortcode($atts = array()) {
     
     return $output;
 }
-add_shortcode('search_results', 'complete_search_results_shortcode');
 
 /**
- * Create smart excerpt with heading awareness - WITH HTML SANITIZATION
+ * Create smart excerpt with heading awareness - WITH CUSTOM HIGHLIGHT COLOR
  */
 function create_smart_excerpt_function($content, $query) {
     // Define allowed HTML tags for sanitization
@@ -413,9 +401,9 @@ function create_smart_excerpt_function($content, $query) {
                     $after_heading = preg_replace('/\s+/', ' ', trim($after_heading));
                     $context = wp_trim_words($after_heading, 25);
                     
-                    // Highlight preserving original case
-                    $highlighted_heading = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $heading_text);
-                    $highlighted_context = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $context);
+                    // Highlight preserving original case with your color
+                    $highlighted_heading = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $heading_text);
+                    $highlighted_context = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $context);
                     
                     $result = '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
                     return wp_kses($result, $allowed_html);
@@ -453,8 +441,8 @@ function create_smart_excerpt_function($content, $query) {
                     $highlighted_context = $context;
                     
                     foreach ($search_terms as $term) {
-                        $highlighted_heading = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $highlighted_heading);
-                        $highlighted_context = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $highlighted_context);
+                        $highlighted_heading = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $highlighted_heading);
+                        $highlighted_context = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $highlighted_context);
                     }
                     
                     $result = '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
@@ -480,7 +468,7 @@ function create_smart_excerpt_function($content, $query) {
         }
         
         // Highlight the exact phrase preserving original case
-        $excerpt_text = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $excerpt_text);
+        $excerpt_text = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $excerpt_text);
         
         return wp_kses($excerpt_text, $allowed_html);
     }
@@ -508,7 +496,7 @@ function create_smart_excerpt_function($content, $query) {
         }
         
         foreach ($search_terms as $term) {
-            $excerpt_text = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $excerpt_text);
+            $excerpt_text = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $excerpt_text);
         }
         
         return wp_kses($excerpt_text, $allowed_html);
@@ -593,10 +581,10 @@ function add_search_highlight_script() {
                             const matchText = originalText.substring(position, position + highlightText.length);
                             const afterText = originalText.substring(position + highlightText.length);
                             
-                            // Replace the text node with highlighted version
+                            // Replace the text node with highlighted version using your color
                             const span = document.createElement('span');
                             span.innerHTML = beforeText + 
-                                '<mark id="search-highlight-flash" style="background: #ffff00; padding: 2px 4px; border-radius: 3px; transition: background-color 3s ease;">' + 
+                                '<mark id="search-highlight-flash" style="background: var(--wp--preset--color--odyssey); padding: 2px 4px; border-radius: 3px; transition: background-color 3s ease;">' + 
                                 matchText + '</mark>' + afterText;
                             
                             element.replaceChild(span, node);
