@@ -379,57 +379,174 @@ add_shortcode('search_results', 'complete_search_results_shortcode');
 /**
  * Create excerpt that prioritizes headings containing search terms
  */
-function create_heading_aware_excerpt($content, $query) {
-    $search_terms = explode(' ', $query);
-    $search_terms = array_filter($search_terms);
+/**
+ * Complete search results that finds exact phrase matches in headings
+ */
+function complete_search_results_shortcode($atts = array()) {
+    if (!is_search()) {
+        return '';
+    }
     
+    global $wp_query;
+    $query = get_search_query();
+    
+    if (empty($query)) {
+        return '<p>Please enter a search term.</p>';
+    }
+    
+    $output = '';
+    
+    // Search results header
+    $output .= '<div class="search-results-header">';
+    $output .= '<h1>Search Results for "' . esc_html($query) . '"</h1>';
+    $output .= '<p>Found ' . $wp_query->found_posts . ' results</p>';
+    $output .= '</div>';
+    
+    if (have_posts()) {
+        $output .= '<div class="search-results-list">';
+        
+        while (have_posts()) {
+            the_post();
+            global $post;
+            
+            // Create smart excerpt that looks for phrase matches in headings
+            $excerpt = create_phrase_aware_excerpt($post->post_content, $query);
+            
+            $output .= '<article class="search-result-item" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">';
+            
+            // Title
+            $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . get_permalink() . '" style="text-decoration: none; color: #2563eb;">' . get_the_title() . '</a></h2>';
+            
+            // Excerpt (don't escape HTML since we want highlighting to show)
+            $output .= '<div class="search-excerpt" style="margin-bottom: 0.5rem; color: #666; line-height: 1.6;">' . $excerpt . '</div>';
+            
+            // Meta info
+            $output .= '<div class="search-meta" style="font-size: 0.875rem; color: #888;">';
+            $output .= '<span>' . get_the_date() . '</span>';
+            if (get_post_type() !== 'post') {
+                $post_type_obj = get_post_type_object(get_post_type());
+                if ($post_type_obj) {
+                    $output .= ' • <span>' . esc_html($post_type_obj->labels->singular_name) . '</span>';
+                }
+            }
+            $output .= ' • <a href="' . get_permalink() . '" style="color: #2563eb;">Read more</a>';
+            $output .= '</div>';
+            
+            $output .= '</article>';
+        }
+        
+        $output .= '</div>';
+        
+    } else {
+        $output .= '<div class="no-results">';
+        $output .= '<h2>No results found</h2>';
+        $output .= '<p>Sorry, no posts matched your search criteria.</p>';
+        $output .= '</div>';
+    }
+    
+    return $output;
+}
+add_shortcode('search_results', 'complete_search_results_shortcode');
+
+/**
+ * Create excerpt that looks for exact phrase matches in headings first
+ */
+function create_phrase_aware_excerpt($content, $query) {
     // Apply content filters to get the real content
     $filtered_content = apply_filters('the_content', $content);
     
-    // Extract headings first
+    // Extract headings with their text
     preg_match_all('/<h[1-6][^>]*>(.*?)<\/h[1-6]>/i', $filtered_content, $headings);
     
-    // Check if any heading contains our search terms
+    // First, look for the exact phrase in headings
     if (!empty($headings[1])) {
-        foreach ($headings[1] as $heading_text) {
-            $heading_clean = strip_tags($heading_text);
-            foreach ($search_terms as $term) {
-                if (stripos($heading_clean, $term) !== false) {
-                    // Found a heading with our search term!
-                    // Get some context around this heading
-                    $heading_pattern = '/<h[1-6][^>]*>' . preg_quote($heading_text, '/') . '<\/h[1-6]>/i';
-                    $split = preg_split($heading_pattern, $filtered_content, 2);
+        foreach ($headings[1] as $heading_html) {
+            $heading_text = strip_tags($heading_html);
+            // Check if this heading contains the exact search phrase
+            if (stripos($heading_text, $query) !== false) {
+                // Found exact phrase in heading!
+                $heading_pattern = '/<h[1-6][^>]*>' . preg_quote($heading_html, '/') . '<\/h[1-6]>/i';
+                $split = preg_split($heading_pattern, $filtered_content, 2);
+                
+                if (count($split) == 2) {
+                    $after_heading = strip_tags($split[1]);
+                    $after_heading = preg_replace('/\s+/', ' ', trim($after_heading));
+                    $context = wp_trim_words($after_heading, 25);
                     
-                    if (count($split) == 2) {
-                        // Get some text after the heading
-                        $after_heading = strip_tags($split[1]);
-                        $after_heading = preg_replace('/\s+/', ' ', trim($after_heading));
-                        $context = wp_trim_words($after_heading, 25);
-                        
-                        $excerpt = '<strong>' . $heading_clean . '</strong><br>' . $context;
-                        
-                        // Apply highlighting
-                        if (function_exists('relevanssi_highlight_terms')) {
-                            $excerpt = relevanssi_highlight_terms($excerpt, $query, false);
-                        } else {
-                            foreach ($search_terms as $term) {
-                                $excerpt = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow;">$1</mark>', $excerpt);
-                            }
-                        }
-                        
-                        return $excerpt;
+                    // Highlight the heading and context
+                    $highlighted_heading = str_ireplace($query, '<mark style="background: yellow; padding: 2px;">' . $query . '</mark>', $heading_text);
+                    $highlighted_context = str_ireplace($query, '<mark style="background: yellow; padding: 2px;">' . $query . '</mark>', $context);
+                    
+                    return '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
+                }
+            }
+        }
+        
+        // If no exact phrase match, look for headings containing individual terms
+        $search_terms = explode(' ', $query);
+        $search_terms = array_filter($search_terms);
+        
+        foreach ($headings[1] as $heading_html) {
+            $heading_text = strip_tags($heading_html);
+            $term_count = 0;
+            
+            // Count how many search terms are in this heading
+            foreach ($search_terms as $term) {
+                if (stripos($heading_text, $term) !== false) {
+                    $term_count++;
+                }
+            }
+            
+            // If this heading contains multiple search terms
+            if ($term_count >= 2 || ($term_count >= 1 && count($search_terms) == 1)) {
+                $heading_pattern = '/<h[1-6][^>]*>' . preg_quote($heading_html, '/') . '<\/h[1-6]>/i';
+                $split = preg_split($heading_pattern, $filtered_content, 2);
+                
+                if (count($split) == 2) {
+                    $after_heading = strip_tags($split[1]);
+                    $after_heading = preg_replace('/\s+/', ' ', trim($after_heading));
+                    $context = wp_trim_words($after_heading, 25);
+                    
+                    // Apply highlighting to heading and context
+                    $highlighted_heading = $heading_text;
+                    $highlighted_context = $context;
+                    
+                    foreach ($search_terms as $term) {
+                        $highlighted_heading = str_ireplace($term, '<mark style="background: yellow; padding: 2px;">' . $term . '</mark>', $highlighted_heading);
+                        $highlighted_context = str_ireplace($term, '<mark style="background: yellow; padding: 2px;">' . $term . '</mark>', $highlighted_context);
                     }
+                    
+                    return '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
                 }
             }
         }
     }
     
-    // No heading match, fall back to content search
+    // No good heading match, search content for exact phrase first
     $clean_content = strip_tags($filtered_content);
     $clean_content = preg_replace('/\s+/', ' ', trim($clean_content));
     
-    // Find first occurrence of search terms
+    $phrase_pos = stripos($clean_content, $query);
+    if ($phrase_pos !== false) {
+        // Found exact phrase in content
+        $start = max(0, $phrase_pos - 100);
+        $excerpt_text = substr($clean_content, $start, 300);
+        $excerpt_text = wp_trim_words($excerpt_text, 40);
+        
+        if ($start > 0) {
+            $excerpt_text = '...' . $excerpt_text;
+        }
+        
+        // Highlight the exact phrase
+        $excerpt_text = str_ireplace($query, '<mark style="background: yellow; padding: 2px;">' . $query . '</mark>', $excerpt_text);
+        
+        return $excerpt_text;
+    }
+    
+    // Final fallback - individual terms
+    $search_terms = explode(' ', $query);
     $best_position = false;
+    
     foreach ($search_terms as $term) {
         $pos = stripos($clean_content, $term);
         if ($pos !== false) {
@@ -440,7 +557,6 @@ function create_heading_aware_excerpt($content, $query) {
     }
     
     if ($best_position !== false) {
-        // Create excerpt around the match
         $start = max(0, $best_position - 100);
         $excerpt_text = substr($clean_content, $start, 300);
         $excerpt_text = wp_trim_words($excerpt_text, 40);
@@ -449,18 +565,12 @@ function create_heading_aware_excerpt($content, $query) {
             $excerpt_text = '...' . $excerpt_text;
         }
         
-        // Apply highlighting
-        if (function_exists('relevanssi_highlight_terms')) {
-            $excerpt_text = relevanssi_highlight_terms($excerpt_text, $query, false);
-        } else {
-            foreach ($search_terms as $term) {
-                $excerpt_text = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow;">$1</mark>', $excerpt_text);
-            }
+        foreach ($search_terms as $term) {
+            $excerpt_text = str_ireplace($term, '<mark style="background: yellow; padding: 2px;">' . $term . '</mark>', $excerpt_text);
         }
         
         return $excerpt_text;
     }
     
-    // Final fallback
     return wp_trim_words($clean_content, 40);
 }
