@@ -508,7 +508,7 @@ function create_smart_excerpt_function($content, $query) {
 }
 
 /**
- * Add ACCESSIBLE JavaScript for deep linking to search results
+ * DEBUG VERSION - Add ACCESSIBLE JavaScript for deep linking to search results
  */
 function add_search_highlight_script() {
     ?>
@@ -519,8 +519,11 @@ function add_search_highlight_script() {
         const highlightText = urlParams.get('highlight');
         
         if (highlightText) {
+            console.log('Looking for:', highlightText);
+            
             // Decode the highlight text
             const searchText = decodeURIComponent(highlightText).toLowerCase();
+            console.log('Searching for (lowercase):', searchText);
             
             // Check user's motion preferences
             const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -536,81 +539,37 @@ function add_search_highlight_script() {
                 
                 let node;
                 let found = false;
+                let searchCount = 0;
                 
                 // Search through all text nodes
                 while (node = walker.nextNode()) {
                     const text = node.textContent.toLowerCase();
                     const position = text.indexOf(searchText);
                     
+                    searchCount++;
+                    if (position !== -1) {
+                        console.log('FOUND at position', position, 'in text:', text.substring(Math.max(0, position-20), position+50));
+                    }
+                    
                     if (position !== -1 && !found) {
+                        console.log('Using this match for scrolling');
                         // Found the text! Get the element containing it
                         const element = node.parentElement;
                         
-                        // Create a focusable wrapper for screen readers
-                        const wrapper = document.createElement('div');
-                        wrapper.setAttribute('tabindex', '-1');
-                        wrapper.setAttribute('role', 'region');
-                        wrapper.setAttribute('aria-label', 'Search result: ' + highlightText);
-                        wrapper.style.outline = 'none';
-                        
-                        // Wrap the parent element
-                        element.parentNode.insertBefore(wrapper, element);
-                        wrapper.appendChild(element);
-                        
                         // Scroll to the element (respecting motion preferences)
-                        wrapper.scrollIntoView({ 
+                        element.scrollIntoView({ 
                             behavior: prefersReducedMotion ? 'auto' : 'smooth', 
                             block: 'center' 
                         });
                         
-                        // Set focus for screen readers
-                        wrapper.focus();
-                        
-                        // Create a screen reader announcement
-                        const announcement = document.createElement('div');
-                        announcement.setAttribute('aria-live', 'polite');
-                        announcement.setAttribute('aria-atomic', 'true');
-                        announcement.className = 'sr-only';
-                        announcement.style.cssText = 'position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;';
-                        announcement.textContent = 'Found search result: ' + highlightText;
-                        document.body.appendChild(announcement);
-                        
-                        // Create visual highlight (only if motion not reduced)
-                        if (!prefersReducedMotion) {
-                            const originalText = node.textContent;
-                            const beforeText = originalText.substring(0, position);
-                            const matchText = originalText.substring(position, position + highlightText.length);
-                            const afterText = originalText.substring(position + highlightText.length);
-                            
-                            // Replace the text node with highlighted version using your color
-                            const span = document.createElement('span');
-                            span.innerHTML = beforeText + 
-                                '<mark id="search-highlight-flash" style="background: var(--wp--preset--color--odyssey); padding: 2px 4px; border-radius: 3px; transition: background-color 3s ease;">' + 
-                                matchText + '</mark>' + afterText;
-                            
-                            element.replaceChild(span, node);
-                            
-                            // Flash effect - fade out the highlight after 3 seconds
-                            setTimeout(function() {
-                                const flashElement = document.getElementById('search-highlight-flash');
-                                if (flashElement) {
-                                    flashElement.style.backgroundColor = 'transparent';
-                                }
-                            }, 3000);
-                        }
-                        
-                        // Clean up announcement after screen readers have had time to read it
-                        setTimeout(function() {
-                            if (announcement.parentNode) {
-                                announcement.parentNode.removeChild(announcement);
-                            }
-                        }, 5000);
+                        console.log('Scrolled to element:', element);
                         
                         found = true;
                         break;
                     }
                 }
                 
+                console.log('Searched through', searchCount, 'text nodes. Found:', found);
                 return found;
             }
             
@@ -619,8 +578,10 @@ function add_search_highlight_script() {
             
             // If exact phrase not found, try individual words
             if (!found) {
+                console.log('Exact phrase not found, trying individual words');
                 const words = searchText.split(' ').filter(word => word.length > 2);
                 for (let word of words) {
+                    console.log('Trying word:', word);
                     if (findAndHighlightText(word)) {
                         break;
                     }
@@ -631,4 +592,3 @@ function add_search_highlight_script() {
     </script>
     <?php
 }
-add_action('wp_footer', 'add_search_highlight_script');
