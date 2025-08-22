@@ -471,3 +471,64 @@ function create_smart_excerpt($content, $query, $excerpt_length = 40) {
     
     return $excerpt;
 }
+
+/**
+ * Debug what content we're actually getting vs what Relevanssi sees
+ */
+function debug_content_comparison() {
+    if (!is_search() || !current_user_can('administrator') || empty(get_search_query())) {
+        return '';
+    }
+    
+    global $post;
+    $query = get_search_query();
+    
+    // Our method
+    $our_content = strip_tags(strip_shortcodes($post->post_content));
+    $our_content = preg_replace('/\s+/', ' ', trim($our_content));
+    
+    // Alternative methods
+    $content_filtered = apply_filters('the_content', $post->post_content);
+    $content_filtered_clean = strip_tags($content_filtered);
+    
+    $output = '<div style="background: #f0f0f0; border: 1px solid #ccc; padding: 15px; margin: 20px 0; font-family: monospace; font-size: 11px;">';
+    $output .= '<h4>Content Debug for Post ID: ' . $post->ID . '</h4>';
+    
+    $output .= '<strong>Our content (first 200 chars):</strong><br>';
+    $output .= esc_html(substr($our_content, 0, 200)) . '...<br><br>';
+    
+    $output .= '<strong>Filtered content (first 200 chars):</strong><br>';
+    $output .= esc_html(substr($content_filtered_clean, 0, 200)) . '...<br><br>';
+    
+    // Check where terms are found in each
+    $search_terms = explode(' ', $query);
+    foreach ($search_terms as $term) {
+        $pos1 = stripos($our_content, $term);
+        $pos2 = stripos($content_filtered_clean, $term);
+        $output .= '<strong>"' . esc_html($term) . '":</strong><br>';
+        $output .= '- Our method: ' . ($pos1 !== false ? $pos1 : 'NOT FOUND') . '<br>';
+        $output .= '- Filtered method: ' . ($pos2 !== false ? $pos2 : 'NOT FOUND') . '<br>';
+        
+        if ($pos1 !== false) {
+            $context = substr($our_content, max(0, $pos1-50), 100);
+            $output .= '- Context (our): ' . esc_html($context) . '<br>';
+        }
+        if ($pos2 !== false) {
+            $context = substr($content_filtered_clean, max(0, $pos2-50), 100);
+            $output .= '- Context (filtered): ' . esc_html($context) . '<br>';
+        }
+        $output .= '<br>';
+    }
+    
+    // Test what Relevanssi is actually working with
+    if (function_exists('relevanssi_highlight_terms')) {
+        $test1 = relevanssi_highlight_terms(substr($our_content, 0, 300), $query, false);
+        $test2 = relevanssi_highlight_terms(substr($content_filtered_clean, 0, 300), $query, false);
+        $output .= '<strong>Relevanssi test on our content:</strong><br>' . $test1 . '<br><br>';
+        $output .= '<strong>Relevanssi test on filtered content:</strong><br>' . $test2 . '<br><br>';
+    }
+    
+    $output .= '</div>';
+    return $output;
+}
+add_shortcode('debug_content', 'debug_content_comparison');
