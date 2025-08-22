@@ -366,6 +366,7 @@ function complete_search_results_shortcode($atts = array()) {
     
     return $output;
 }
+add_shortcode('search_results', 'complete_search_results_shortcode');
 
 /**
  * Create smart excerpt with heading awareness - WITH CUSTOM HIGHLIGHT COLOR
