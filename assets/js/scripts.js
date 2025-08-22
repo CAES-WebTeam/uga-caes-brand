@@ -139,3 +139,83 @@ searchIcon.addEventListener('click', function() {
   // Toggle the state
   isOpen = !isOpen;
 });*/
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Search highlight script loaded from file');
+    
+    // Check if we have a highlight parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightText = urlParams.get('highlight');
+    
+    if (highlightText) {
+        console.log('Looking for:', highlightText);
+        
+        // Decode the highlight text
+        const searchText = decodeURIComponent(highlightText).toLowerCase();
+        
+        // Check user's motion preferences
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        
+        // Function to find and highlight text
+        function findAndHighlightText(searchText) {
+            const walker = document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            let node;
+            let found = false;
+            
+            // Search through all text nodes
+            while (node = walker.nextNode()) {
+                const text = node.textContent.toLowerCase();
+                const position = text.indexOf(searchText);
+                
+                if (position !== -1 && !found) {
+                    console.log('Found text, scrolling to it');
+                    // Found the text! Get the element containing it
+                    const element = node.parentElement;
+                    
+                    // Scroll to the element
+                    element.scrollIntoView({ 
+                        behavior: prefersReducedMotion ? 'auto' : 'smooth', 
+                        block: 'center' 
+                    });
+                    
+                    // Add temporary highlight
+                    const originalText = node.textContent;
+                    const beforeText = originalText.substring(0, position);
+                    const matchText = originalText.substring(position, position + highlightText.length);
+                    const afterText = originalText.substring(position + highlightText.length);
+                    
+                    const span = document.createElement('span');
+                    span.innerHTML = beforeText + 
+                        '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px 4px; border-radius: 3px; transition: background-color 3s ease;">' + 
+                        matchText + '</mark>' + afterText;
+                    
+                    element.replaceChild(span, node);
+                    
+                    found = true;
+                    break;
+                }
+            }
+            
+            return found;
+        }
+        
+        // Try to find exact phrase first
+        let found = findAndHighlightText(searchText);
+        
+        // If exact phrase not found, try individual words
+        if (!found) {
+            const words = searchText.split(' ').filter(word => word.length > 2);
+            for (let word of words) {
+                if (findAndHighlightText(word)) {
+                    break;
+                }
+            }
+        }
+    }
+});

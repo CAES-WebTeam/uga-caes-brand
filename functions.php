@@ -506,33 +506,3 @@ function create_smart_excerpt_function($content, $query) {
     // Final fallback - sanitize even plain text
     return wp_kses(wp_trim_words($clean_content, 40), $allowed_html);
 }
-
-/**
- * SIMPLE DEBUG - Add JavaScript for deep linking to search results
- */
-function add_search_highlight_script() {
-    ?>
-    <script>
-    console.log('Search highlight script loaded');
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded');
-        console.log('Current URL:', window.location.href);
-        
-        // Check if we have a highlight parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        console.log('All URL params:', urlParams.toString());
-        
-        const highlightText = urlParams.get('highlight');
-        console.log('Highlight parameter:', highlightText);
-        
-        if (highlightText) {
-            console.log('We have highlight text, proceeding...');
-            alert('Found highlight parameter: ' + highlightText);
-        } else {
-            console.log('No highlight parameter found');
-        }
-    });
-    </script>
-    <?php
-}
