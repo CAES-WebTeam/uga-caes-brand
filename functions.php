@@ -347,7 +347,7 @@ function complete_search_results_shortcode($atts = array()) {
             $output .= '<article class="search-result-item" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">';
             
             // Title with deep link (no blue styling)
-            $output .= '<h2 style="margin: 0 0 0.5rem 0; text-decoration: none"><a href="' . esc_url($deep_link) . '">' . get_the_title() . '</a></h2>';
+            $output .= '<h2 style="margin: 0 0 0.5rem 0;"><a href="' . esc_url($deep_link) . '">' . get_the_title() . '</a></h2>';
             
             // Excerpt (don't escape HTML since we want highlighting to show)
             $output .= '<div class="search-excerpt" style="margin-bottom: 0.5rem; color: #666; line-height: 1.6;">' . $excerpt . '</div>';
