@@ -393,8 +393,8 @@ function create_smart_excerpt_function($content, $query) {
                     $context = wp_trim_words($after_heading, 25);
                     
                     // Highlight preserving original case
-                    $highlighted_heading = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $heading_text);
-                    $highlighted_context = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $context);
+                    $highlighted_heading = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $heading_text);
+                    $highlighted_context = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $context);
                     
                     return '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
                 }
@@ -431,8 +431,8 @@ function create_smart_excerpt_function($content, $query) {
                     $highlighted_context = $context;
                     
                     foreach ($search_terms as $term) {
-                        $highlighted_heading = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $highlighted_heading);
-                        $highlighted_context = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $highlighted_context);
+                        $highlighted_heading = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $highlighted_heading);
+                        $highlighted_context = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $highlighted_context);
                     }
                     
                     return '<strong>' . $highlighted_heading . '</strong><br>' . $highlighted_context;
@@ -457,7 +457,7 @@ function create_smart_excerpt_function($content, $query) {
         }
         
         // Highlight the exact phrase preserving original case
-        $excerpt_text = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $excerpt_text);
+        $excerpt_text = preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $excerpt_text);
         
         return $excerpt_text;
     }
@@ -485,7 +485,7 @@ function create_smart_excerpt_function($content, $query) {
         }
         
         foreach ($search_terms as $term) {
-            $excerpt_text = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: yellow; padding: 2px;">$1</mark>', $excerpt_text);
+            $excerpt_text = preg_replace('/(' . preg_quote($term, '/') . ')/i', '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px;">$1</mark>', $excerpt_text);
         }
         
         return $excerpt_text;
