@@ -519,7 +519,7 @@ function create_smart_excerpt_function($content, $query) {
 }
 
 /**
- * Add JavaScript for deep linking to search results
+ * Add ACCESSIBLE JavaScript for deep linking to search results
  */
 function add_search_highlight_script() {
     ?>
@@ -532,6 +532,9 @@ function add_search_highlight_script() {
         if (highlightText) {
             // Decode the highlight text
             const searchText = decodeURIComponent(highlightText).toLowerCase();
+            
+            // Check user's motion preferences
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             
             // Function to find and highlight text
             function findAndHighlightText(searchText) {
@@ -554,33 +557,65 @@ function add_search_highlight_script() {
                         // Found the text! Get the element containing it
                         const element = node.parentElement;
                         
-                        // Scroll to the element
-                        element.scrollIntoView({ 
-                            behavior: 'smooth', 
+                        // Create a focusable wrapper for screen readers
+                        const wrapper = document.createElement('div');
+                        wrapper.setAttribute('tabindex', '-1');
+                        wrapper.setAttribute('role', 'region');
+                        wrapper.setAttribute('aria-label', 'Search result: ' + highlightText);
+                        wrapper.style.outline = 'none';
+                        
+                        // Wrap the parent element
+                        element.parentNode.insertBefore(wrapper, element);
+                        wrapper.appendChild(element);
+                        
+                        // Scroll to the element (respecting motion preferences)
+                        wrapper.scrollIntoView({ 
+                            behavior: prefersReducedMotion ? 'auto' : 'smooth', 
                             block: 'center' 
                         });
                         
-                        // Create a highlight span
-                        const originalText = node.textContent;
-                        const beforeText = originalText.substring(0, position);
-                        const matchText = originalText.substring(position, position + highlightText.length);
-                        const afterText = originalText.substring(position + highlightText.length);
+                        // Set focus for screen readers
+                        wrapper.focus();
                         
-                        // Replace the text node with highlighted version
-                        const span = document.createElement('span');
-                        span.innerHTML = beforeText + 
-                            '<span id="search-highlight-flash" style="background: #ffff00; padding: 2px 4px; border-radius: 3px; transition: background-color 3s ease;">' + 
-                            matchText + '</span>' + afterText;
+                        // Create a screen reader announcement
+                        const announcement = document.createElement('div');
+                        announcement.setAttribute('aria-live', 'polite');
+                        announcement.setAttribute('aria-atomic', 'true');
+                        announcement.className = 'sr-only';
+                        announcement.style.cssText = 'position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;';
+                        announcement.textContent = 'Found search result: ' + highlightText;
+                        document.body.appendChild(announcement);
                         
-                        element.replaceChild(span, node);
+                        // Create visual highlight (only if motion not reduced)
+                        if (!prefersReducedMotion) {
+                            const originalText = node.textContent;
+                            const beforeText = originalText.substring(0, position);
+                            const matchText = originalText.substring(position, position + highlightText.length);
+                            const afterText = originalText.substring(position + highlightText.length);
+                            
+                            // Replace the text node with highlighted version
+                            const span = document.createElement('span');
+                            span.innerHTML = beforeText + 
+                                '<mark id="search-highlight-flash" style="background: #ffff00; padding: 2px 4px; border-radius: 3px; transition: background-color 3s ease;">' + 
+                                matchText + '</mark>' + afterText;
+                            
+                            element.replaceChild(span, node);
+                            
+                            // Flash effect - fade out the highlight after 3 seconds
+                            setTimeout(function() {
+                                const flashElement = document.getElementById('search-highlight-flash');
+                                if (flashElement) {
+                                    flashElement.style.backgroundColor = 'transparent';
+                                }
+                            }, 3000);
+                        }
                         
-                        // Flash effect - fade out the highlight after 3 seconds
+                        // Clean up announcement after screen readers have had time to read it
                         setTimeout(function() {
-                            const flashElement = document.getElementById('search-highlight-flash');
-                            if (flashElement) {
-                                flashElement.style.backgroundColor = 'transparent';
+                            if (announcement.parentNode) {
+                                announcement.parentNode.removeChild(announcement);
                             }
-                        }, 3000);
+                        }, 5000);
                         
                         found = true;
                         break;
