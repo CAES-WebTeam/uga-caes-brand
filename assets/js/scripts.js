@@ -156,6 +156,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check user's motion preferences
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         
+        // Function to check if element is visible
+        function isElementVisible(element) {
+            const rect = element.getBoundingClientRect();
+            const style = window.getComputedStyle(element);
+            
+            return (
+                rect.width > 0 && 
+                rect.height > 0 && 
+                style.display !== 'none' && 
+                style.visibility !== 'hidden' &&
+                style.opacity !== '0'
+            );
+        }
+        
         // Function to find and highlight text
         function findAndHighlightText(searchText) {
             const walker = document.createTreeWalker(
@@ -167,65 +181,64 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let node;
             let found = false;
+            let attempts = 0;
             
             // Search through all text nodes
             while (node = walker.nextNode()) {
                 const text = node.textContent.toLowerCase();
                 const position = text.indexOf(searchText);
                 
-                if (position !== -1 && !found) {
-                    console.log('Found text, scrolling to it');
-                    // Found the text! Get the element containing it
+                if (position !== -1) {
+                    attempts++;
                     const element = node.parentElement;
                     
-                    console.log('Element to scroll to:', element);
-                    console.log('Element position:', element.getBoundingClientRect());
-                    console.log('Window height:', window.innerHeight);
+                    console.log('Attempt', attempts, '- Found text in:', element);
+                    console.log('Element visible?', isElementVisible(element));
+                    console.log('Element rect:', element.getBoundingClientRect());
                     
-                    // Try different scroll approaches
-                    try {
-                        // Method 1: scrollIntoView
+                    // Skip if element is not visible or has no dimensions
+                    if (!isElementVisible(element)) {
+                        console.log('Skipping hidden element');
+                        continue;
+                    }
+                    
+                    // Skip navigation elements - look for main content instead
+                    if (element.closest('nav') || element.classList.contains('wp-block-navigation-item__label')) {
+                        console.log('Skipping navigation element, looking for content');
+                        continue;
+                    }
+                    
+                    if (!found) {
+                        console.log('Using this visible element for scrolling');
+                        
+                        // Scroll to the element
                         element.scrollIntoView({ 
                             behavior: prefersReducedMotion ? 'auto' : 'smooth', 
                             block: 'center' 
                         });
-                        console.log('scrollIntoView called');
                         
-                        // Method 2: Also try scrolling the window directly
-                        setTimeout(() => {
-                            const rect = element.getBoundingClientRect();
-                            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                            const targetY = rect.top + scrollTop - (window.innerHeight / 2);
-                            
-                            console.log('Manually scrolling to:', targetY);
-                            window.scrollTo({
-                                top: targetY,
-                                behavior: prefersReducedMotion ? 'auto' : 'smooth'
-                            });
-                        }, 100);
+                        console.log('Scrolled to visible element');
                         
-                    } catch (error) {
-                        console.log('Scroll error:', error);
+                        // Add temporary highlight
+                        const originalText = node.textContent;
+                        const beforeText = originalText.substring(0, position);
+                        const matchText = originalText.substring(position, position + highlightText.length);
+                        const afterText = originalText.substring(position + highlightText.length);
+                        
+                        const span = document.createElement('span');
+                        span.innerHTML = beforeText + 
+                            '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px 4px; border-radius: 3px; transition: background-color 3s ease;">' + 
+                            matchText + '</mark>' + afterText;
+                        
+                        element.replaceChild(span, node);
+                        
+                        found = true;
+                        break;
                     }
-                    
-                    // Add temporary highlight
-                    const originalText = node.textContent;
-                    const beforeText = originalText.substring(0, position);
-                    const matchText = originalText.substring(position, position + highlightText.length);
-                    const afterText = originalText.substring(position + highlightText.length);
-                    
-                    const span = document.createElement('span');
-                    span.innerHTML = beforeText + 
-                        '<mark style="background: var(--wp--preset--color--odyssey); padding: 2px 4px; border-radius: 3px; transition: background-color 3s ease;">' + 
-                        matchText + '</mark>' + afterText;
-                    
-                    element.replaceChild(span, node);
-                    
-                    found = true;
-                    break;
                 }
             }
             
+            console.log('Total attempts:', attempts, 'Found visible:', found);
             return found;
         }
         
