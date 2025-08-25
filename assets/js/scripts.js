@@ -141,14 +141,14 @@ searchIcon.addEventListener('click', function() {
 });*/
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Search highlight script loaded from file');
+    // console.log('Search highlight script loaded from file');
     
     // Check if we have a highlight parameter
     const urlParams = new URLSearchParams(window.location.search);
     const highlightText = urlParams.get('highlight');
     
     if (highlightText) {
-        console.log('Looking for:', highlightText);
+        // console.log('Looking for:', highlightText);
         
         // Decode the highlight text
         const searchText = decodeURIComponent(highlightText).toLowerCase();
@@ -192,19 +192,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     attempts++;
                     const element = node.parentElement;
                     
-                    console.log('Attempt', attempts, '- Found text in:', element);
-                    console.log('Element visible?', isElementVisible(element));
-                    console.log('Element rect:', element.getBoundingClientRect());
+                    // console.log('Attempt', attempts, '- Found text in:', element);
+                    // console.log('Element visible?', isElementVisible(element));
+                    // console.log('Element rect:', element.getBoundingClientRect());
                     
                     // Skip if element is not visible or has no dimensions
                     if (!isElementVisible(element)) {
-                        console.log('Skipping hidden element');
+                        // console.log('Skipping hidden element');
                         continue;
                     }
                     
                     // Skip navigation elements - look for main content instead
                     if (element.closest('nav') || element.classList.contains('wp-block-navigation-item__label')) {
-                        console.log('Skipping navigation element, looking for content');
+                        // console.log('Skipping navigation element, looking for content');
                         continue;
                     }
                     
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             block: 'center' 
                         });
                         
-                        console.log('Scrolled to visible element');
+                        // console.log('Scrolled to visible element');
                         
                         // Add temporary highlight
                         const originalText = node.textContent;
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            console.log('Total attempts:', attempts, 'Found visible:', found);
+            // console.log('Total attempts:', attempts, 'Found visible:', found);
             return found;
         }
         
@@ -247,10 +247,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // If exact phrase not found, try individual words
         if (!found) {
-            console.log('Exact phrase not found, trying individual words');
+            // console.log('Exact phrase not found, trying individual words');
             const words = searchText.split(' ').filter(word => word.length > 2);
             for (let word of words) {
-                console.log('Trying word:', word);
+                // console.log('Trying word:', word);
                 if (findAndHighlightText(word)) {
                     break;
                 }
