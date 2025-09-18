@@ -254,13 +254,19 @@ figure a {
 	padding-right: 0 !important;
 }
 
+
 .main-nav nav {
 	gap: 0 !important;
 	position: fixed;
 	left: 0;
-	top: 132px;
+	top: 100px;
 	bottom: 0;
 	width: 299px;
+	height: calc(100vh - 100px);
+}
+
+.admin-bar .main-nav nav {
+	top: 132px;
 	height: calc(100vh - 132px);
 }
 
