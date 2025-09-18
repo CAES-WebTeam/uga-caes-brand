@@ -249,7 +249,7 @@ figure a {
 	/* Change this to your desired hover color */
 }
 
-/* .main-nav {
+.main-nav {
 	padding-left: 0 !important;
 	padding-right: 0 !important;
 }
@@ -290,60 +290,7 @@ figure a {
 
 .main-nav .wp-block-navigation .has-child .wp-block-navigation__submenu-container .wp-block-navigation-item__content {
 	font-size: var(--wp--preset--font-size--medium);
-} */
-
-.main-nav {
-	padding-left: 0 !important;
-	padding-right: 0 !important;
-	/* Add scrollable functionality */
-	max-height: calc(100vh - 100px - var(--wp--preset--spacing--60));
-	/* Adjust based on your header height */
-	overflow-y: auto;
-	overflow-x: hidden;
-	/* Ensure smooth scrolling */
-	scroll-behavior: smooth;
 }
-
-/* Update the nav positioning inside main-nav */
-.main-nav nav {
-	gap: 0 !important;
-	width: 100%;
-	/* Remove sticky positioning since the parent container will handle scrolling */
-	position: static;
-	/* Remove the top positioning */
-	/* top: calc(100px + var(--wp--preset--spacing--60)); */
-}
-
-/* Optional: Custom scrollbar styling for the sidebar (matches your existing scrollbar styles) */
-.main-nav::-webkit-scrollbar {
-	width: 6px;
-}
-
-.main-nav::-webkit-scrollbar-thumb {
-	background-color: #ba0c2f;
-	border-radius: 3px;
-}
-
-.main-nav::-webkit-scrollbar-track {
-	background-color: #f1f1f1;
-}
-
-/* Ensure the navigation items maintain their styling */
-.main-nav .wp-block-navigation__submenu-icon {
-	display: none !important;
-}
-
-.main-nav .wp-block-navigation .wp-block-navigation-item {
-	display: block;
-	width: 100%;
-}
-
-.main-nav .wp-block-navigation .has-child .wp-block-navigation__submenu-container {
-	position: relative !important;
-	background: #efefef !important;
-	border: 0 !important;
-}
-
 
 .uga_mobile_navigation .wp-block-navigation__submenu-container .wp-block-navigation-item {
 	position: relative;
