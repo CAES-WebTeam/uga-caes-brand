@@ -129,31 +129,6 @@ figure a {
 
 
 /*************  Navigation ***************/
-/* a { text-decoration: none; outline: none; } */
-/* .fixed { position: fixed; z-index: 99; } */
-
-/* .top-nav { top:0; width:100vw; z-index:1000; } */
-
-/* .side-nav { top:100px; width:25vw; max-height:100vh; overflow-y:auto; border-right:1px solid black; max-width:300px;} */
-/* .side-nav-border-home { border-right:none !important; } */
-
-/*  Wordpress Navigation Styles */
-/* .wp-block-navigation-item__label:hover {
-	color: #ba0c2f;
-	text-decoration: none;
-} */
-
-/* .wp-block-navigation-item__content:hover {
-	color: #ba0c2f;
-	text-decoration: none;
-} */
-
-/* .wp-block-navigation-item a.active-page { color: #ba0c2f !important; } */
-
-/* Style for the parent menu item if any child link is active */
-/* .wp-block-navigation-item.child-active > a {
-	color: #ba0c2f !important;
-} */
 
 .child-link-container {
 	display: flex;
@@ -175,12 +150,6 @@ figure a {
 .side-nav::-webkit-scrollbar-track {
 	background-color: #f1f1f1;
 }
-
-/* .wp-block-navigation__submenu-container>li>a {
-	font-size: 16px;
-	color: black;
-} */
-
 
 /***************** Custom Navigation **************/
 .vertical-menu a {
@@ -280,7 +249,7 @@ figure a {
 	/* Change this to your desired hover color */
 }
 
-.main-nav {
+/* .main-nav {
 	padding-left: 0 !important;
 	padding-right: 0 !important;
 }
@@ -321,10 +290,60 @@ figure a {
 
 .main-nav .wp-block-navigation .has-child .wp-block-navigation__submenu-container .wp-block-navigation-item__content {
 	font-size: var(--wp--preset--font-size--medium);
+} */
+
+.main-nav {
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	/* Add scrollable functionality */
+	max-height: calc(100vh - 100px - var(--wp--preset--spacing--60));
+	/* Adjust based on your header height */
+	overflow-y: auto;
+	overflow-x: hidden;
+	/* Ensure smooth scrolling */
+	scroll-behavior: smooth;
 }
 
-/*.main-nav .wp-block-navigation__submenu-container .wp-block-navigation-item { position:relative; padding-left:30px; }
-.main-nav .wp-block-navigation__submenu-container .wp-block-navigation-item:before { content:''; position:absolute; top:0; bottom:0; left:0; margin:auto 0; background:#ba0c2f; height:3px; width:35px; }*/
+/* Update the nav positioning inside main-nav */
+.main-nav nav {
+	gap: 0 !important;
+	width: 100%;
+	/* Remove sticky positioning since the parent container will handle scrolling */
+	position: static;
+	/* Remove the top positioning */
+	/* top: calc(100px + var(--wp--preset--spacing--60)); */
+}
+
+/* Optional: Custom scrollbar styling for the sidebar (matches your existing scrollbar styles) */
+.main-nav::-webkit-scrollbar {
+	width: 6px;
+}
+
+.main-nav::-webkit-scrollbar-thumb {
+	background-color: #ba0c2f;
+	border-radius: 3px;
+}
+
+.main-nav::-webkit-scrollbar-track {
+	background-color: #f1f1f1;
+}
+
+/* Ensure the navigation items maintain their styling */
+.main-nav .wp-block-navigation__submenu-icon {
+	display: none !important;
+}
+
+.main-nav .wp-block-navigation .wp-block-navigation-item {
+	display: block;
+	width: 100%;
+}
+
+.main-nav .wp-block-navigation .has-child .wp-block-navigation__submenu-container {
+	position: relative !important;
+	background: #efefef !important;
+	border: 0 !important;
+}
+
 
 .uga_mobile_navigation .wp-block-navigation__submenu-container .wp-block-navigation-item {
 	position: relative;
@@ -342,25 +361,6 @@ figure a {
 	height: 2px;
 	width: 35px;
 }
-
-/*.wp-block-navigation-item__content.active-page { color:inherit !important; position:relative; padding-left:25px; }
-.wp-block-navigation-item__content.active-page:before { content:''; position:absolute; top:0; bottom:0; left:0; width:20px; height:3px; margin:auto 0; background:#ba0c2f; }*/
-
-/* .wp-block-navigation-item__content:hover,
-.wp-block-navigation-item__label:hover {
-	background: #ba0c2f;
-	color: #fff !important;
-} */
-
-/* .wp-block-navigation-item__content:visited,
-.wp-block-navigation-item__label:visited {
-	color: #000 !important;
-} */
-
-/* .wp-block-navigation-item__content:active,
-.wp-block-navigation-item__label:active {
-	color: #ba0c2f !important;
-} */
 
 .wp-block-navigation-item__content {
 	transition: all 0.1s ease-in-out;
