@@ -256,13 +256,19 @@ figure a {
 
 .main-nav nav {
 	gap: 0 !important;
-	width: 100%;
-	position: sticky;
-	top: calc(100px + var(--wp--preset--spacing--60));
+	position: fixed;
+	left: 0;
+	top: 132px;
+	bottom: 0;
+	width: 299px;
+	height: calc(100vh - 132px);
 }
+
 
 .main-nav nav ul {
 	width: 100%;
+	overflow-y: scroll;
+	display: block;
 }
 
 .main-nav .wp-block-navigation__submenu-icon {
