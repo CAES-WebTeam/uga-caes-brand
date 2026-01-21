@@ -537,3 +537,14 @@ function add_gtm_body() {
     }
 }
 add_action('wp_body_open', 'add_gtm_body');
+
+// Add Georgia Pro font from Adobe; licensed from OMC's account
+function theme_enqueue_typekit_fonts() {
+    wp_enqueue_style(
+        'typekit-fonts',
+        'https://use.typekit.net/eos5svd.css',
+        array(),
+        null
+    );
+}
+add_action('wp_enqueue_scripts', 'theme_enqueue_typekit_fonts');

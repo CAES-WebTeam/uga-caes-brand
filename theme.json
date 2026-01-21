@@ -1,87 +1,97 @@
 {
-	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"$schema": "https://schemas.wp.org/wp/6.9/theme.json",
 	"version": 3,
 	"settings": {
 		"appearanceTools": true,
 		"color": {
 			"defaultDuotone": false,
-			"defaultPalette": false,
 			"defaultGradients": false,
+			"defaultPalette": false,
 			"palette": [
 				{
-					"slug": "contrast",
 					"color": "#000000",
-					"name": "Arch Black"
+					"name": "Arch Black",
+					"slug": "contrast"
 				},
 				{
-					"slug": "bulldog-red",
 					"color": "#BA0C2F",
-					"name": "Bulldog Red"
+					"name": "Bulldog Red",
+					"slug": "bulldog-red"
 				},
 				{
-					"slug": "base",
 					"color": "#FFFFFF",
-					"name": "Chapel Bell White"
+					"name": "Chapel Bell White",
+					"slug": "base"
 				},
 				{
-					"slug": "glory-glory",
 					"color": "#E4002B",
-					"name": "Glory Glory"
+					"name": "Glory Glory",
+					"slug": "glory-glory"
 				},
 				{
-					"slug": "lake-herrick",
 					"color": "#00A3AD",
-					"name": "Lake Herrick"
+					"name": "Lake Herrick",
+					"slug": "lake-herrick"
 				},
 				{
-					"slug": "hedges",
 					"color": "#B4BD00",
-					"name": "Hedges"
+					"name": "Hedges",
+					"slug": "hedges"
 				},
 				{
-					"slug": "olympic",
 					"color": "#004E60",
-					"name": "Olympic"
+					"name": "Olympic",
+					"slug": "olympic"
 				},
 				{
-					"slug": "sanford",
 					"color": "#554F47",
-					"name": "Sanford"
+					"name": "Sanford",
+					"slug": "sanford"
 				},
 				{
-					"slug": "herty-field",
 					"color": "#594A25",
-					"name": "Herty Field"
+					"name": "Herty Field",
+					"slug": "herty-field"
 				},
 				{
-					"slug": "athens",
 					"color": "#66435A",
-					"name": "Athens"
+					"name": "Athens",
+					"slug": "athens"
 				},
 				{
-					"slug": "stegeman",
 					"color": "#9EA2A2",
-					"name": "Stegeman"
+					"name": "Stegeman",
+					"slug": "stegeman"
 				},
 				{
-					"slug": "creamery",
 					"color": "#D6D2C4",
-					"name": "Creamery"
+					"name": "Creamery",
+					"slug": "creamery"
 				},
 				{
-					"slug": "odyssey",
 					"color": "#C8D8EB",
-					"name": "Odyssey"
+					"name": "Odyssey",
+					"slug": "odyssey"
 				},
 				{
-					"slug": "light-gray",
 					"color": "#EFEFEF",
-					"name": "Light Gray"
+					"name": "Light Gray",
+					"slug": "light-gray"
 				},
 				{
-					"slug": "gray",
 					"color": "#A3A2A2",
-					"name": "Gray"
+					"name": "Gray",
+					"slug": "gray"
+				},
+				{
+					"color": "#ebfeff",
+					"name": "Light Herrick",
+					"slug": "custom-light-herrick"
+				},
+				{
+					"color": "#f9fbb3",
+					"name": "Light Hedges",
+					"slug": "custom-light-hedges"
 				}
 			]
 		},
@@ -90,82 +100,56 @@
 			"wideSize": "1280px"
 		},
 		"spacing": {
-            "blockGap": true,
-            "margin": true,
-            "padding": true,
-            "spacingScale": {
-                "operator": "*",
-                "increment": 2,
-                "steps": 7,
-                "mediumStep": 1.5,
-                "unit": "rem"
-            }
-        },
+			"spacingScale": {
+				"increment": 2,
+				"mediumStep": 1.5,
+				"operator": "*",
+				"steps": 7,
+				"unit": "rem"
+			}
+		},
 		"typography": {
-			"fluid": true,
-			"writingMode": true,
 			"defaultFontSizes": false,
-			"fontSizes": [
-				{
-					"fluid": false,
-					"name": "Small",
-					"size": "0.9rem",
-					"slug": "small"
-				},
-				{
-					"fluid": false,
-					"name": "Medium",
-					"size": "1.05rem",
-					"slug": "medium"
-				},
-				{
-					"fluid": {
-						"min": "1.39rem",
-						"max": "1.85rem"
-					},
-					"name": "Large",
-					"size": "1.85rem",
-					"slug": "large"
-				},
-				{
-					"fluid": {
-						"min": "1.85rem",
-						"max": "2.5rem"
-					},
-					"name": "Extra Large",
-					"size": "2.5rem",
-					"slug": "x-large"
-				},
-				{
-					"fluid": {
-						"min": "2.5rem",
-						"max": "3.27rem"
-					},
-					"name": "Extra Extra Large",
-					"size": "3.27rem",
-					"slug": "xx-large"
-				}
-			],
+			"fluid": true,
 			"fontFamilies": [
 				{
-					"fontFamily": "Georgia",
-					"name": "Georgia",
-					"slug": "georgia",
 					"fontFace": [
 						{
-							"fontFamily": "Georgia",
+							"fontFamily": "georgiapro",
 							"fontStyle": "normal",
-							"fontWeight": "400",
-							"src": [
-								"file:./assets/fonts/georgia/georgia-400-normal.woff2"
-							]
+							"fontWeight": "300"
+						},
+						{
+							"fontFamily": "georgiapro",
+							"fontStyle": "italic",
+							"fontWeight": "300"
+						},
+						{
+							"fontFamily": "georgiapro",
+							"fontStyle": "normal",
+							"fontWeight": "400"
+						},
+						{
+							"fontFamily": "georgiapro",
+							"fontStyle": "italic",
+							"fontWeight": "400"
+						},
+						{
+							"fontFamily": "georgiapro",
+							"fontStyle": "normal",
+							"fontWeight": "700"
+						},
+						{
+							"fontFamily": "georgiapro",
+							"fontStyle": "italic",
+							"fontWeight": "700"
 						}
-					]
+					],
+					"fontFamily": "georgiapro, Georgia, serif",
+					"name": "Georgia Pro",
+					"slug": "georgia"
 				},
 				{
-					"fontFamily": "Merriweather",
-					"name": "Merriweather",
-					"slug": "merriweather",
 					"fontFace": [
 						{
 							"fontFamily": "Merriweather",
@@ -231,12 +215,12 @@
 								"file:./assets/fonts/merriweather/merriweather-900-italic.woff2"
 							]
 						}
-					]
+					],
+					"fontFamily": "Merriweather",
+					"name": "Merriweather",
+					"slug": "merriweather"
 				},
 				{
-					"fontFamily": "\"Merriweather Sans\", sans-serif",
-					"name": "Merriweather Sans",
-					"slug": "merriweather-sans",
 					"fontFace": [
 						{
 							"fontFamily": "\"Merriweather Sans\"",
@@ -334,12 +318,12 @@
 								"file:./assets/fonts/merriweather-sans/merriweather-sans-800-italic.woff2"
 							]
 						}
-					]
+					],
+					"fontFamily": "\"Merriweather Sans\", sans-serif",
+					"name": "Merriweather Sans",
+					"slug": "merriweather-sans"
 				},
 				{
-					"fontFamily": "\"Noto Serif Georgian\", serif",
-					"name": "Noto Serif Georgian",
-					"slug": "noto-serif-georgian",
 					"fontFace": [
 						{
 							"fontFamily": "\"Noto Serif Georgian\"",
@@ -413,12 +397,12 @@
 								"file:./assets/fonts/noto-serif-georgian/noto-serif-georgian-900-normal.woff2"
 							]
 						}
-					]
+					],
+					"fontFamily": "\"Noto Serif Georgian\", serif",
+					"name": "Noto Serif Georgian",
+					"slug": "noto-serif-georgian"
 				},
 				{
-					"fontFamily": "Oswald, sans-serif",
-					"name": "Oswald",
-					"slug": "oswald",
 					"fontFace": [
 						{
 							"fontFamily": "Oswald",
@@ -468,12 +452,12 @@
 								"file:./assets/fonts/oswald/oswald-700-normal.woff2"
 							]
 						}
-					]
+					],
+					"fontFamily": "Oswald, sans-serif",
+					"name": "Oswald",
+					"slug": "oswald"
 				},
 				{
-					"fontFamily": "\"TradeGothic LT CondEighteen\"",
-					"name": "TradeGothic LT CondEighteen",
-					"slug": "tradegothic-lt-condeighteen",
 					"fontFace": [
 						{
 							"fontFamily": "\"TradeGothic LT CondEighteen\"",
@@ -483,21 +467,97 @@
 								"file:./assets/fonts/tradegothic-lt-condeighteen/tradegothic-lt-condeighteen-700-normal.woff2"
 							]
 						}
-					]
+					],
+					"fontFamily": "\"TradeGothic LT CondEighteen\"",
+					"name": "TradeGothic LT CondEighteen",
+					"slug": "tradegothic-lt-condeighteen"
 				}
-			]
+			],
+			"fontSizes": [
+				{
+					"fluid": false,
+					"name": "Small",
+					"size": "0.9rem",
+					"slug": "small"
+				},
+				{
+					"fluid": false,
+					"name": "Medium",
+					"size": "1.05rem",
+					"slug": "medium"
+				},
+				{
+					"fluid": {
+						"max": "1.85rem",
+						"min": "1.39rem"
+					},
+					"name": "Large",
+					"size": "1.85rem",
+					"slug": "large"
+				},
+				{
+					"fluid": {
+						"max": "2.5rem",
+						"min": "1.85rem"
+					},
+					"name": "Extra Large",
+					"size": "2.5rem",
+					"slug": "x-large"
+				},
+				{
+					"fluid": {
+						"max": "3.27rem",
+						"min": "2.5rem"
+					},
+					"name": "Extra Extra Large",
+					"size": "3.27rem",
+					"slug": "xx-large"
+				}
+			],
+			"writingMode": true
 		},
 		"useRootPaddingAwareAlignments": true
 	},
 	"styles": {
+		"blocks": {
+			"core/button": {
+				"border": {
+					"radius": ".33rem"
+				},
+				"color": {
+					"background": "var(--wp--preset--color--olympic)",
+					"text": "var(--wp--preset--color--base)"
+				},
+				"elements": {
+					"link": {
+						"color": {
+							"text": "var(--wp--preset--color--base)"
+						}
+					}
+				},
+				"spacing": {
+					"padding": {
+						"bottom": "var(--wp--preset--spacing--30)",
+						"left": "var(--wp--preset--spacing--40)",
+						"right": "var(--wp--preset--spacing--40)",
+						"top": "var(--wp--preset--spacing--30)"
+					}
+				},
+				"typography": {
+					"lineHeight": "1"
+				}
+			},
+			"core/separator": {
+				"border": {
+					"color": "var(--wp--preset--color--gray)",
+					"width": "1px"
+				}
+			}
+		},
 		"color": {
 			"background": "var(--wp--preset--color--base)",
 			"text": "var(--wp--preset--color--contrast)"
 		},
-		"typography": {
-            "fontFamily": "var(--wp--preset--font-family--merriweather)",
-            "lineHeight": "1.55"
-        },
 		"elements": {
 			"button": {
 				":active": {
@@ -507,6 +567,9 @@
 					}
 				},
 				":focus": {
+					"border": {
+						"color": "var(--wp--preset--color--contrast-2)"
+					},
 					"color": {
 						"background": "var(--wp--preset--color--contrast-2)",
 						"text": "var(--wp--preset--color--base)"
@@ -514,26 +577,23 @@
 					"outline": {
 						"color": "var(--wp--preset--color--contrast)",
 						"offset": "2px"
-					},
-					"border": {
-						"color": "var(--wp--preset--color--contrast-2)"
 					}
 				},
 				":hover": {
+					"border": {
+						"color": "var(--wp--preset--color--contrast-2)"
+					},
 					"color": {
 						"background": "var(--wp--preset--color--contrast-2)",
 						"text": "var(--wp--preset--color--base)"
-					},
-					"border": {
-						"color": "var(--wp--preset--color--contrast-2)"
 					}
 				},
 				"border": {
-					"radius": ".33rem",
-					"color": "var(--wp--preset--color--contrast)"
+					"color": "var(--wp--preset--color--contrast)",
+					"radius": ".33rem"
 				},
 				"color": {
-					"background": "var(--wp--preset--color--contrast)",
+					"background": "var(--wp--preset--color--olympic)",
 					"text": "var(--wp--preset--color--base)"
 				},
 				"spacing": {
@@ -550,54 +610,60 @@
 					"fontWeight": "500"
 				}
 			},
-			"heading": {
-				"typography": {
-                    "fontFamily": "var(--wp--preset--font-family--oswald)",
-                    "textTransform": "uppercase",
-                    "fontStyle": "normal",
-                    "fontWeight": "400"
-                }
-			},
 			"h1": {
 				"typography": {
 					"fontFamily": "var(--wp--preset--font-family--oswald)",
-					"fontSize": "var(--wp--preset--font-size--xx-large)",
-					"lineHeight": "1.15"
+					"fontSize": "67px",
+					"fontStyle": "normal",
+					"fontWeight": "700",
+					"lineHeight": "1.15",
+					"textTransform": "uppercase"
 				}
 			},
 			"h2": {
+				"css": "color: var(--wp--preset--color--bulldog-red)",
 				"typography": {
 					"fontFamily": "var(--wp--preset--font-family--oswald)",
-					"fontSize": "var(--wp--preset--font-size--x-large)"
-				},
-				"css": "color: var(--wp--preset--color--bulldog-red)"
+					"fontSize": "3rem",
+					"textTransform": "uppercase"
+				}
 			},
 			"h3": {
+				"css": "color: var(--wp--preset--color--sanford)",
 				"typography": {
-					"fontFamily": "var(--wp--preset--font-family--merriweather)",
-					"fontSize": "var(--wp--preset--font-size--large)",
-					"fontStyle": "italic",
+					"fontFamily": "var(--wp--preset--font-family--georgia)",
+					"fontSize": "35px",
+					"fontStyle": "normal",
 					"fontWeight": "400",
 					"textTransform": "none"
-				},
-				"css": "color: var(--wp--preset--color--sanford)"
+				}
 			},
 			"h4": {
 				"typography": {
 					"fontFamily": "var(--wp--preset--font-family--oswald)",
-					"fontSize": "clamp(1.1rem, 1.1rem + ((1vw - 0.2rem) * 0.767), 1.5rem)"
+					"fontSize": "28px",
+					"fontStyle": "italic",
+					"fontWeight": "600"
 				}
 			},
 			"h5": {
 				"typography": {
 					"fontFamily": "var(--wp--preset--font-family--oswald)",
-					"fontSize": "var(--wp--preset--font-size--medium)"
+					"fontSize": "22px"
 				}
 			},
 			"h6": {
 				"typography": {
 					"fontFamily": "var(--wp--preset--font-family--oswald)",
-					"fontSize": "var(--wp--preset--font-size--small)"
+					"fontSize": "18px"
+				}
+			},
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--oswald)",
+					"fontStyle": "normal",
+					"fontWeight": "400",
+					"textTransform": "uppercase"
 				}
 			},
 			"link": {
@@ -606,40 +672,10 @@
 				}
 			}
 		},
-		"blocks": {
-			"core/button": {
-                "border": {
-                    "radius": ".33rem"
-                },
-                "color": {
-                    "background": "var(--wp--preset--color--bulldog-red)",
-                    "text": "var(--wp--preset--color--base)"
-                },
-                "typography": {
-                    "lineHeight": "1"
-                },
-                "spacing": {
-                    "padding": {
-                        "top": "var(--wp--preset--spacing--30)",
-                        "bottom": "var(--wp--preset--spacing--30)",
-                        "left": "var(--wp--preset--spacing--40)",
-                        "right": "var(--wp--preset--spacing--40)"
-                    }
-                },
-                "elements": {
-                    "link": {
-                        "color": {
-                            "text": "var(--wp--preset--color--base)"
-                        }
-                    }
-                }
-            },
-			"core/separator": {
-                "border": {
-                    "color": "var(--wp--preset--color--gray)",
-                    "width": "1px"
-                }
-            }
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--georgia)",
+			"fontSize": "var(--wp--preset--font-size--medium)",
+			"lineHeight": "1.55"
 		}
 	},
 	"templateParts": [
