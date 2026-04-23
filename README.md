@@ -17,6 +17,7 @@ A WordPress theme for the University of Georgia College of Agricultural and Envi
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.3.2 | 2026-04-23 | Add accessibility barrier link to footer |
 | 2.3.1 | 2026-01-21 | Updated readme.md |
 | 2.3 | 2026-01-21 | Added Georgia Pro font |
 | 2.2 | 2025-10-03 | Added Google Tag Manager |
