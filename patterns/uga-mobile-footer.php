@@ -17,7 +17,7 @@
 <!-- /wp:group -->
 
 <!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|10"}},"layout":{"selfStretch":"fixed","flexSize":"55%"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"left","verticalAlignment":"top","orientation":"horizontal"}} -->
-<div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--10)"><!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0","top":"0","bottom":"0"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"left"}} -->
+<div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--10)"><!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0","top":"0","bottom":"0"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"left","verticalAlignment":"top"}} -->
 <div class="wp-block-group" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0"><!-- wp:group {"style":{"border":{"width":"0px","style":"none"},"spacing":{"padding":{"right":"8px","left":"8px"},"blockGap":"1px"},"layout":{"selfStretch":"fit","flexSize":null}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group" style="border-style:none;border-width:0px;padding-right:8px;padding-left:8px"><!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"#ffffff99"}}},"typography":{"fontSize":"2px"},"color":{"text":"#ffffff99"}},"fontFamily":"merriweather"} -->
 <p class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:2px"><a style="color:#ffffff99;font-size:12px" class="has-text-color has-link-color has-merriweather-font-family" href="https://www.uga.edu/schools/">Schools and Colleges</a></p>
