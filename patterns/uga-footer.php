@@ -35,25 +35,25 @@
 
 <!-- wp:paragraph {"className":"footer-link","style":{"elements":{"link":{"color":{"text":"#ffffff99"}}},"typography":{"fontSize":"12px"},"color":{"text":"#ffffff99"}},"fontFamily":"merriweather"} -->
 <p class="footer-link has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px"><a class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px" href="https://peoplesearch.uga.edu/">Directory</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"footer-link","style":{"elements":{"link":{"color":{"text":"#ffffff99"}}},"typography":{"fontSize":"12px"},"color":{"text":"#ffffff99"}},"fontFamily":"merriweather"} -->
+<p class="footer-link has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px">MyUGA</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"style":{"border":{"top":{"width":"0px","style":"none"},"right":{"width":"0px","style":"none"},"bottom":{"width":"0px","style":"none"},"left":{"color":"#ffffff6e","width":"1px"}},"spacing":{"padding":{"right":"8px","left":"8px"},"blockGap":"1px"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 <div class="wp-block-group" style="border-top-style:none;border-top-width:0px;border-right-style:none;border-right-width:0px;border-bottom-style:none;border-bottom-width:0px;border-left-color:#ffffff6e;border-left-width:1px;padding-right:8px;padding-left:8px"><!-- wp:paragraph {"className":"footer-link","style":{"elements":{"link":{"color":{"text":"#ffffff99"}}},"typography":{"fontSize":"12px"},"color":{"text":"#ffffff99"}},"fontFamily":"merriweather"} -->
-<p class="footer-link has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px">MyUGA</p>
+<p class="footer-link has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px"><a class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px" href="https://hr.uga.edu/applicants/" data-type="link" data-id="https://hr.uga.edu/applicants/">Employment Opportunities</a></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"className":"footer-link","style":{"elements":{"link":{"color":{"text":"#ffffff99"}}},"typography":{"fontSize":"12px"},"color":{"text":"#ffffff99"}},"fontFamily":"merriweather"} -->
-<p class="footer-link has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px"><a class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px" href="https://hr.uga.edu/applicants/" data-type="link" data-id="https://hr.uga.edu/applicants/">Employment Opportunities</a></p>
+<p class="footer-link has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px"><a class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px" href="https://mc.uga.edu/policy/trademark">Copyright and Trademarks</a></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"style":{"border":{"top":{"width":"0px","style":"none"},"right":{"width":"0px","style":"none"},"bottom":{"width":"0px","style":"none"},"left":{"color":"#ffffff6e","width":"1px"}},"spacing":{"padding":{"right":"8px","left":"8px"},"blockGap":"1px"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"left"}} -->
 <div class="wp-block-group" style="border-top-style:none;border-top-width:0px;border-right-style:none;border-right-width:0px;border-bottom-style:none;border-bottom-width:0px;border-left-color:#ffffff6e;border-left-width:1px;padding-right:8px;padding-left:8px"><!-- wp:paragraph {"className":"footer-link","style":{"elements":{"link":{"color":{"text":"#ffffff99"}}},"typography":{"fontSize":"12px"},"color":{"text":"#ffffff99"}},"fontFamily":"merriweather"} -->
-<p class="footer-link has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px"><a class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px" href="https://mc.uga.edu/policy/trademark">Copyright and Trademarks</a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"className":"footer-link","style":{"elements":{"link":{"color":{"text":"#ffffff99"}}},"typography":{"fontSize":"12px"},"color":{"text":"#ffffff99"}},"fontFamily":"merriweather"} -->
 <p class="footer-link has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px"><a class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px" href="https://eits.uga.edu/access_and_security/infosec/pols_regs/policies/privacy/">Privacy</a></p>
 <!-- /wp:paragraph -->
 
