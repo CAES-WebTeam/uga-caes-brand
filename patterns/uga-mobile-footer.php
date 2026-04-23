@@ -28,7 +28,7 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"#ffffff99"}}},"typography":{"fontSize":"12px"},"color":{"text":"#ffffff99"}},"fontFamily":"merriweather"} -->
-<p class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px">MyUGA</p>
+<p class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px"><a href="https://my.uga.edu/">MyUGA</a></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
