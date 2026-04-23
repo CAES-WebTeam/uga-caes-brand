@@ -55,6 +55,10 @@
 
 <!-- wp:paragraph {"className":"footer-link","style":{"elements":{"link":{"color":{"text":"#ffffff99"}}},"typography":{"fontSize":"12px"},"color":{"text":"#ffffff99"}},"fontFamily":"merriweather"} -->
 <p class="footer-link has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px"><a class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px" href="https://eits.uga.edu/access_and_security/infosec/pols_regs/policies/privacy/">Privacy</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"footer-link","style":{"elements":{"link":{"color":{"text":"#ffffff99"}}},"typography":{"fontSize":"12px"},"color":{"text":"#ffffff99"}},"fontFamily":"merriweather"} -->
+<p class="footer-link has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px"><a class="has-text-color has-link-color has-merriweather-font-family" style="color:#ffffff99;font-size:12px" href="https://uga.teamdynamix.com/TDClient/3190/eitsclientportal/Requests/TicketRequests/NewForm?ID=7tC59R-FSCY_&RequestorType=Service">Report an Accessibility Barrier</a></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
